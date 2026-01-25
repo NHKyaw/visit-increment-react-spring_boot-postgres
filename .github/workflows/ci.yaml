@@ -123,7 +123,8 @@ jobs:
       - name: Get EC2 public IP
         working-directory: terraform
         run: |
-          IP=$(terraform output -raw ec2_public_ip | tr -d '\n\r ')
+          ##jq is already installed on GitHub runners — safe to use.
+          IP=$(terraform output -json | jq -r '.ec2_public_ip.value') 
           echo "EC2_IP=$IP" >> $GITHUB_ENV
 
 
