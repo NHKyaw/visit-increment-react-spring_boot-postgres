@@ -8,6 +8,14 @@ on:
   push:
     branches:
       - "**"
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to destroy (dev / uat / prod)"
+        required: true
+      confirm:
+        description: "Type DESTROY to confirm"
+        required: true
 
 jobs:
   test:
@@ -173,36 +181,10 @@ jobs:
           EOF
 
 
-      - name: Terraform Destroy (Manual Only)
-
-        on:
-          workflow_dispatch:
-            inputs:
-              environment:
-                description: "Environment to destroy (dev / uat / prod)"
-                required: true
-              confirm:
-                description: "Type DESTROY to confirm"
-                required: true
-
   destroy:
     runs-on: ubuntu-latest
-
+    if: github.event_name == 'workflow_dispatch'
     steps:
-
-      - name: Terraform Destroy (Manual Only)
-
-        on:
-          workflow_dispatch:
-            inputs:
-              environment:
-                description: "Environment to destroy (dev / uat / prod)"
-                required: true
-              confirm:
-                description: "Type DESTROY to confirm"
-                required: true
-
-
       - name: Safety check
         run: |
           if [ "${{ inputs.confirm }}" != "DESTROY" ]; then
