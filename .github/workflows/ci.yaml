@@ -169,7 +169,7 @@ jobs:
             docker pull ${{ env.DOCKER_REPO }}:frontend-${IMAGE_TAG}
 
             docker compose down
-            docker compose --env-file .env.${IMAGE_TAG} -f docker-compose.yml up -d
+            docker compose --env-file .env.${IMAGE_TAG} -f docker-compose.yaml up -d
           EOF
 
       # - name: Verify Deployment#1 - Backend
