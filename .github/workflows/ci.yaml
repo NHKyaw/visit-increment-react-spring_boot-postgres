@@ -135,7 +135,7 @@ jobs:
 
       - name: Verify EC2 IP
         run: |
-        echo "EC2_IP from Env: [${{ env.EC2_IP }}]"
+          echo "EC2_IP from Env: [${{ env.EC2_IP }}]"
 
       - name: Prepare SSH key
         run: |
