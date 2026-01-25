@@ -4,8 +4,8 @@ variable "region" {
 
 variable "visit_increment_key_name" {
   description = "EC2 key pair name"
-  default = "visit_increment"
-  type = string
+  default     = "visit_increment"
+  type        = string
 }
 
 variable "instance_type" {

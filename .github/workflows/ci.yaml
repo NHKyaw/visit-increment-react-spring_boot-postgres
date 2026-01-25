@@ -112,23 +112,30 @@ jobs:
 
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_wrapper: false
 
       - name: Terraform apply
-        working-directory: terraform
-        run: |
-          terraform init
-          terraform apply -auto-approve \
-            -var="environment=${ENV}"
+              working-directory: terraform
+              run: |
+                terraform init -backend-config="key=env/${ENV}/terraform.tfstate"
+                terraform apply -auto-approve -var="environment=${ENV}"
 
-      - name: Get EC2 public IP (rock solid)
-        working-directory: terraform
-        run: |
-          EC2_IP=$(terraform output -json | jq -r '.ec2_public_ip.value')
-          echo "EC2_IP=$EC2_IP" >> $GITHUB_ENV
+      - name: Get EC2 public IP
+              working-directory: terraform
+              run: |
+                EC2_IP=$(terraform output -raw ec2_public_ip)
+                
+                if [ -z "$EC2_IP" ] || [ "$EC2_IP" == "null" ]; then
+                  echo "ERROR: EC2_IP is empty. Check if 'output' is defined in .tf files."
+                  exit 1
+                fi
+                
+                echo "EC2_IP=$EC2_IP" >> $GITHUB_ENV
 
       - name: Verify EC2 IP
-        run: |
-          echo "EC2_IP=[$EC2_IP]"
+              run: |
+                echo "EC2_IP from Env: [${{ env.EC2_IP }}]"
 
       - name: Prepare SSH key
         run: |
@@ -137,26 +144,25 @@ jobs:
           chmod 600 ~/.ssh/ec2.pem
 
       - name: Add EC2 to known_hosts
-        run: |
-          ssh-keyscan -H $EC2_IP >> ~/.ssh/known_hosts
+              run: |
+                ssh-keyscan -H ${{ env.EC2_IP }} >> ~/.ssh/known_hosts
 
       - name: Copy docker directory to EC2 (scp)
         run: |
           scp -i ~/.ssh/ec2.pem -r docker ubuntu@$EC2_IP:~/
 
       - name: Run Docker Compose on EC2
-        run: |
-          ssh -i ~/.ssh/ec2.pem ubuntu@$EC2_IP << 'EOF'
-            set -e
-            cd ~/docker
+              run: |
+                ssh -i ~/.ssh/ec2.pem ubuntu@${{ env.EC2_IP }} << EOF
+                  set -e
+                  cd ~/docker
 
-            docker pull $DOCKER_REPO:backend-${BRANCH_NAME}
-            docker pull $DOCKER_REPO:frontend-${BRANCH_NAME}
+                  docker pull ${{ env.DOCKER_REPO }}:backend-${{ env.BRANCH_NAME }}
+                  docker pull ${{ env.DOCKER_REPO }}:frontend-${{ env.BRANCH_NAME }}
 
-
-            docker compose down
-            docker compose --env-file .env.${BRANCH_NAME} -f docker-compose.yml up -d
-          EOF
+                  docker compose down
+                  docker compose --env-file .env.${{ env.BRANCH_NAME }} -f docker-compose.yml up -d
+                EOF
 
       # - name: Verify Deployment#1 - Backend
       #   run: |

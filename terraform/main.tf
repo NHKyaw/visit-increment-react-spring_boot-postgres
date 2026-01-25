@@ -1,8 +1,8 @@
 resource "aws_vpc" "visit_record_vpc" {
-  cidr_block = "10.0.0.0/16"
+  cidr_block           = "10.0.0.0/16"
   enable_dns_hostnames = true
-  enable_dns_support = true
-  instance_tenancy = "default"
+  enable_dns_support   = true
+  instance_tenancy     = "default"
   tags = {
     Name = "visit-record-vpc"
   }
@@ -17,8 +17,8 @@ resource "aws_internet_gateway" "visit_record_gw" {
 }
 
 resource "aws_subnet" "visit_record_subnet" {
-  vpc_id     = aws_vpc.visit_record_vpc.id
-  cidr_block = "10.0.1.0/24"
+  vpc_id                  = aws_vpc.visit_record_vpc.id
+  cidr_block              = "10.0.1.0/24"
   map_public_ip_on_launch = true
   tags = {
     Name = "visit-record-subnet"
@@ -43,7 +43,7 @@ resource "aws_route_table_association" "public_rt_association" {
 }
 
 resource "aws_security_group" "visit_record_sg" {
-  name = "visit-record-sg"
+  name   = "visit-record-sg"
   vpc_id = aws_vpc.visit_record_vpc.id
 
   ingress {
@@ -79,11 +79,11 @@ resource "aws_security_group" "visit_record_sg" {
 }
 
 resource "aws_instance" "visit_record_instance" {
-  ami                    = "ami-08d59269edddde222" # Ubuntu 22.04 (change per region)
-  instance_type          = var.instance_type
-  key_name               = var.visit_increment_key_name
-  vpc_security_group_ids = [aws_security_group.visit_record_sg.id]
-  subnet_id              = aws_subnet.visit_record_subnet.id
+  ami                         = "ami-08d59269edddde222" # Ubuntu 22.04 (change per region)
+  instance_type               = var.instance_type
+  key_name                    = var.visit_increment_key_name
+  vpc_security_group_ids      = [aws_security_group.visit_record_sg.id]
+  subnet_id                   = aws_subnet.visit_record_subnet.id
   associate_public_ip_address = true
 
   user_data = file("userdata.sh")
@@ -96,9 +96,9 @@ resource "aws_instance" "visit_record_instance" {
 
 terraform {
   backend "s3" {
-    bucket         = "visit-record-terraform-state"
-    key            = "env/prod/terraform.tfstate"
-    region         = "ap-southeast-1"
-    encrypt        = true
+    bucket  = "visit-record-terraform-state"
+    key     = "env/${var.environment}/terraform.tfstate"
+    region  = "ap-southeast-1"
+    encrypt = true
   }
 }
