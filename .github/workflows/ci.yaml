@@ -151,17 +151,25 @@ jobs:
         run: |
           scp -i ~/.ssh/ec2.pem -r docker ubuntu@$EC2_IP:~/
 
+      - name: Set Docker tag
+        run: |
+          if [[ "${BRANCH_NAME}" == "main" || "${BRANCH_NAME}" == "master" ]]; then
+            echo "IMAGE_TAG=prod" >> $GITHUB_ENV
+          else
+            echo "IMAGE_TAG=${BRANCH_NAME}" >> $GITHUB_ENV
+          fi
+
       - name: Run Docker Compose on EC2
         run: |
           ssh -i ~/.ssh/ec2.pem ubuntu@${{ env.EC2_IP }} << EOF
             set -e
             cd ~/docker
 
-            docker pull ${{ env.DOCKER_REPO }}:backend-${{ env.BRANCH_NAME }}
-            docker pull ${{ env.DOCKER_REPO }}:frontend-${{ env.BRANCH_NAME }}
+            docker pull ${{ env.DOCKER_REPO }}:backend-${IMAGE_TAG}
+            docker pull ${{ env.DOCKER_REPO }}:frontend-${IMAGE_TAG}
 
             docker compose down
-            docker compose --env-file .env.${{ env.BRANCH_NAME }} -f docker-compose.yml up -d
+            docker compose --env-file .env.${IMAGE_TAG} -f docker-compose.yml up -d
           EOF
 
       # - name: Verify Deployment#1 - Backend
