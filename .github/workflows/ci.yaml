@@ -128,6 +128,7 @@ jobs:
         run: |
           terraform init -backend-config="key=env/${ENV}/terraform.tfstate"
           terraform apply -auto-approve -var="environment=${ENV}"
+          terraform destroy -var="environment=${{ inputs.environment }}" ##########Delete this line if not needed!Temporary Purpose#########
 
       - name: Get EC2 public IP
         working-directory: terraform
