@@ -89,7 +89,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     needs: build
-    if: github.ref_name == 'dev' || github.ref_name == 'uat' || github.ref_name == 'prod'
+    if: github.ref_name == 'dev' || github.ref_name == 'uat' || github.ref_name == 'main' || github.ref_name == 'master'
 
     steps:
       - name: Map branch to environment #$GITHUB_ENV is a special file that sets environment variables for future steps in a job.
