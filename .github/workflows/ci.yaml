@@ -67,8 +67,6 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build & Push Backend
-        run: |
       - name: Build & push backend
         run: |
           docker build -t $DOCKER_REPO:backend-${BRANCH_NAME} backend
@@ -106,18 +104,16 @@ jobs:
 
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v2
-      
-      - name: Change directory
-        run: 
-          working-directory: terraform
 
       - name: Terraform apply
+        working-directory: terraform
         run: |
           terraform init
           terraform apply -auto-approve \
             -var="environment=${ENV}"
 
       - name: Get EC2 public IP
+        working-directory: terraform
         run: |
           echo "EC2_IP=$(terraform output -raw ec2_public_ip)" >> $GITHUB_ENV
 
@@ -133,20 +129,21 @@ jobs:
 
       - name: Copy docker directory to EC2 (scp)
         run: |
-          scp -i ~/.ssh/ec2.pem -r docker ubuntu@$EC2_IP:~
+          scp -i ~/.ssh/ec2.pem -r docker ubuntu@$EC2_IP:~/
 
       - name: Run Docker Compose on EC2
         run: |
           ssh -i ~/.ssh/ec2.pem ubuntu@$EC2_IP << 'EOF'
             set -e
-          cd ~/docker
+            cd ~/docker
 
-          docker pull $DOCKER_REPO:backend-${BRANCH_NAME}
-          docker pull $DOCKER_REPO:frontend-${BRANCH_NAME}
+            docker pull $DOCKER_REPO:backend-${BRANCH_NAME}
+            docker pull $DOCKER_REPO:frontend-${BRANCH_NAME}
 
 
-          docker compose down
-          docker compose --env-file .env.${BRANCH_NAME} -f docker/docker-compose.yml up -d
+            docker compose down
+            docker compose --env-file .env.${BRANCH_NAME} -f docker-compose.yml up -d
+          EOF
 
       # - name: Verify Deployment#1 - Backend
       #   run: |
@@ -158,14 +155,14 @@ jobs:
       #     sleep 15
       #     curl -X GET http://localhost:8080/api/visit/count || exit 1
 
-<<<<<<< HEAD
+
       # - name: Verify Deployment - Frontend
       #   run: |
       #     sleep 15
       #     curl -X GET http://localhost:3000 || exit 1
-=======
-      - name: Verify Deployment - Frontend
-        run: |
-          sleep 15
-          curl -X GET http://localhost:3000 || exit 1
->>>>>>> b7cc30c6bfea0c198eefe99aa7a672c3aa3385d0
+
+      # - name: Verify Deployment - Frontend
+      #   run: |
+      #     sleep 15
+      #     curl -X GET http://localhost:3000 || exit 1
+
