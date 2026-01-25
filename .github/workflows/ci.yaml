@@ -120,12 +120,13 @@ jobs:
           terraform apply -auto-approve \
             -var="environment=${ENV}"
 
-      - name: Get EC2 public IP
+      - name: Get EC2 public IP (safe)
         working-directory: terraform
         run: |
-          ##jq is already installed on GitHub runners — safe to use.
-          IP=$(terraform output -json | jq -r '.ec2_public_ip.value') 
+          terraform output -json -no-color > tfout.json
+          IP=$(jq -r '.ec2_public_ip.value' tfout.json)
           echo "EC2_IP=$IP" >> $GITHUB_ENV
+
 
 
       - name: Prepare SSH key
