@@ -120,12 +120,11 @@ jobs:
           terraform apply -auto-approve \
             -var="environment=${ENV}"
 
-      - name: Get EC2 public IP (safe)
+      - name: Get EC2 public IP (bulletproof)
         working-directory: terraform
         run: |
-          terraform output -json -no-color > tfout.json
-          IP=$(jq -r '.ec2_public_ip.value' tfout.json)
-          echo "EC2_IP=$IP" >> $GITHUB_ENV
+          IP="$(terraform output -raw ec2_public_ip 2>/dev/null | tail -n 1 | tr -d '\r\n[:space:]')"
+          echo "EC2_IP=$IP" >> "$GITHUB_ENV"
 
 
 
