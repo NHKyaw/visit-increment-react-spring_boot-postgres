@@ -67,15 +67,23 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
+      - name: Set Docker tag
+        run: |
+          if [[ "${BRANCH_NAME}" == "main" || "${BRANCH_NAME}" == "master" ]]; then
+            echo "IMAGE_TAG=prod" >> $GITHUB_ENV
+          else
+            echo "IMAGE_TAG=${BRANCH_NAME}" >> $GITHUB_ENV
+          fi
+
       - name: Build & push backend
         run: |
-          docker build -t $DOCKER_REPO:backend-${BRANCH_NAME} backend
-          docker push $DOCKER_REPO:backend-${BRANCH_NAME}
+          docker build -t $DOCKER_REPO:backend-${IMAGE_TAG} backend
+          docker push $DOCKER_REPO:backend-${IMAGE_TAG}
 
       - name: Build & push frontend
         run: |
-          docker build -t $DOCKER_REPO:frontend-${BRANCH_NAME} frontend
-          docker push $DOCKER_REPO:frontend-${BRANCH_NAME}
+          docker build -t $DOCKER_REPO:frontend-${IMAGE_TAG} frontend
+          docker push $DOCKER_REPO:frontend-${IMAGE_TAG}
 
 
   deploy:

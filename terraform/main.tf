@@ -92,3 +92,13 @@ resource "aws_instance" "visit_record_instance" {
     Name = "visit-record-${var.environment}"
   }
 }
+
+
+terraform {
+  backend "s3" {
+    bucket         = "visit-record-terraform-state"
+    key            = "env/prod/terraform.tfstate"
+    region         = "ap-southeast-1"
+    encrypt        = true
+  }
+}
