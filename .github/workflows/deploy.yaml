@@ -64,6 +64,23 @@ jobs:
           echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/ec2.pem
           chmod 600 ~/.ssh/ec2.pem
 
+      - name: Wait for EC2 SSH to be ready
+        run: |
+          echo "Waiting for SSH on $EC2_IP..."
+          for i in {1..30}; do
+            if ssh -o StrictHostKeyChecking=no \
+                  -o ConnectTimeout=5 \
+                  -i ~/.ssh/ec2.pem \
+                  ubuntu@${EC2_IP} "echo SSH ready"; then
+              echo "SSH is ready!"
+              exit 0
+            fi
+            echo "Still booting... retry in 10s"
+            sleep 10
+          done
+
+          echo "ERROR: EC2 did not become ready in time"
+          exit 1
       - name: Add EC2 to known_hosts
         run: |
           ssh-keyscan -H ${{ env.EC2_IP }} >> ~/.ssh/known_hosts
