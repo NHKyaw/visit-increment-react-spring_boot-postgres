@@ -99,20 +99,37 @@ jobs:
 
       - name: Deploy on EC2
         run: |
+          # Wait for SSH to be ready (max 30 attempts)
+          echo "Waiting for SSH connection on ${{ env.EC2_IP }}..."
           for i in {1..30}; do
             if ssh -tt -o StrictHostKeyChecking=no \
                   -o ConnectTimeout=5 \
                   -o BatchMode=yes \
                   -i ~/.ssh/ec2.pem \
-                  ubuntu@${{ env.EC2_IP }} "echo SSH ready"; then
+                  ubuntu@${{ env.EC2_IP }} "echo 'SSH ready'"; then
               echo "SSH is ready!"
+              # SSH connection successful, now run deployment commands
+              ssh -tt -o StrictHostKeyChecking=no \
+                  -o BatchMode=yes \
+                  -i ~/.ssh/ec2.pem \
+                  ubuntu@${{ env.EC2_IP }} << 'EOF'
+              set -e
+              docker pull nhkyaw/visit-record-app:backend-${{ env.IMAGE_TAG }}
+              docker pull nhkyaw/visit-record-app:frontend-${{ env.IMAGE_TAG }}
+              docker compose down
+              docker compose --env-file .env.${{ env.IMAGE_TAG }} -f docker-compose.yaml up -d
+              EOF
               exit 0
             fi
-            docker pull nhkyaw/visit-record-app:backend-${IMAGE_TAG}
-            docker pull nhkyaw/visit-record-app:frontend-${IMAGE_TAG}
+            echo "Attempt $i: SSH not ready yet, retry in 10s"
+            sleep 10
+          done
+          echo "ERROR: EC2 did not become ready in time"
+          exit 1
 
-            docker compose down
-            docker compose --env-file .env.${IMAGE_TAG} -f docker-compose.yaml up -d
+
+
+
 
       # - name: Deploy to EC2
       #   uses: appleboy/ssh-action@v1.0.3
