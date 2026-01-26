@@ -8,6 +8,11 @@ on:
       stack: # "react" or "java"
         required: true
         type: string
+    secrets:
+      DOCKER_USERNAME:
+        required: true
+      DOCKER_PASSWORD:
+        required: true
 
 jobs:
   build:
