@@ -6,7 +6,7 @@ function App() {
   
   // 1. Run 'ip addr' in your VMware terminal
   // 2. Replace the IP below with your actual VM IP address
-  const VM_IP = "192.168.0.107"; 
+  const VM_IP = "52.74.64.15"; 
   const BASE_URL = `http://${VM_IP}:8080/api/visit`;
 
   const refreshCount = async () => {
