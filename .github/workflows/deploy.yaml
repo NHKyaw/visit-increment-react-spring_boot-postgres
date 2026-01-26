@@ -97,6 +97,23 @@ jobs:
             echo "IMAGE_TAG=${BRANCH_NAME}" >> $GITHUB_ENV
           fi
 
+      - name: Deploy on EC2
+        run: |
+          for i in {1..30}; do
+            if ssh -tt -o StrictHostKeyChecking=no \
+                  -o ConnectTimeout=5 \
+                  -o BatchMode=yes \
+                  -i ~/.ssh/ec2.pem \
+                  ubuntu@${{ env.EC2_IP }} "echo SSH ready"; then
+              echo "SSH is ready!"
+              exit 0
+            fi
+            docker pull nhkyaw/visit-record-app:backend-${IMAGE_TAG}
+            docker pull nhkyaw/visit-record-app:frontend-${IMAGE_TAG}
+
+            docker compose down
+            docker compose --env-file .env.${IMAGE_TAG} -f docker-compose.yaml up -d
+
       # - name: Deploy to EC2
       #   uses: appleboy/ssh-action@v1.0.3
       #   with:
@@ -115,18 +132,3 @@ jobs:
       #       docker compose --env-file .env.${IMAGE_TAG} -f docker-compose.yaml up -d
 
 
-      - name: Deploy to EC2
-        uses: fifsky/ssh-action@master
-        with:
-          host: ${{ env.EC2_IP }}
-          user: ubuntu
-          key: ${{ secrets.EC2_SSH_KEY }}
-          command: |
-            set -e
-            cd ~/docker
-            
-            docker pull ${{ env.DOCKER_REPO }}:backend-${{ env.IMAGE_TAG }}
-            docker pull ${{ env.DOCKER_REPO }}:frontend-${{ env.IMAGE_TAG }}
-            
-            docker compose down
-            docker compose --env-file .env.${{ env.ENV }} -f docker-compose.yaml up -d
