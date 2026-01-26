@@ -16,13 +16,14 @@ jobs:
     uses: ./.github/workflows/build.yaml
     with:
       stack: 'java'
+    secrets: inherit
 
   build-react:
     needs: [test-app]
     uses: ./.github/workflows/build.yaml
     with:
       stack: 'react'
-
+    secrets: inherit
 
 
   # 3. DEPLOY PHASE (Runs only if Tests succeed)
