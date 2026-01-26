@@ -111,7 +111,7 @@ resource "aws_instance" "visit_record_instance" {
 
 resource "aws_eip" "visit_record_eip" {
   instance = aws_instance.visit_record_instance.id
-  domain   = "visit-record-eip"
+  domain   = "vpc"
 }
 
 
