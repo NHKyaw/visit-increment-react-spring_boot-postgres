@@ -1,62 +1,70 @@
+name: Deploy Visit Record App
+
 env:
-  BRANCH_NAME: ${{ github.ref_name }}
   DOCKER_REPO: nhkyaw/visit-record-app
 
 on:
   workflow_call:
 
-jobs: 
+jobs:
   deploy:
     runs-on: ubuntu-latest
-    if: github.ref_name == 'dev' || github.ref_name == 'uat' || github.ref_name == 'main' || github.ref_name == 'master'
+
+    # Only run on these branches
+    if: >-
+      github.ref_name == 'dev' ||
+      github.ref_name == 'uat' ||
+      github.ref_name == 'main' ||
+      github.ref_name == 'master'
+
+    env:
+      BRANCH_NAME: ${{ github.ref_name }}
 
     steps:
-      - name: Map branch to environment #$GITHUB_ENV is a special file that sets environment variables for future steps in a job.
+      - name: Determine deployment environment
         run: |
-          if [[ "${GITHUB_REF_NAME}" == "main" ]]; then
-            echo "ENV=prod" >> $GITHUB_ENV
-          else
-            echo "ENV=${GITHUB_REF_NAME}" >> $GITHUB_ENV
-          fi
+          case "${{ github.ref_name }}" in
+            main|master) echo "ENV=prod"      >> $GITHUB_ENV ;;
+            *)           echo "ENV=${{ github.ref_name }}" >> $GITHUB_ENV ;;
+          esac
 
-      - name: checkout code
-        uses: actions/checkout@v4   
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-access-key-id:     ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
+          aws-region:            ${{ secrets.AWS_REGION }}
 
       - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v2
+        uses: hashicorp/setup-terraform@v3   # ← updated to latest stable
         with:
           terraform_wrapper: false
 
-
-# terraform destroy -auto-approve -var="environment=${{ inputs.environment }}"
       - name: Terraform apply
         working-directory: terraform
         run: |
-          terraform init -backend-config="key=env/${ENV}/terraform.tfstate"
-          terraform apply -auto-approve -var="environment=${ENV}"
+          terraform init \
+            -backend-config="key=env/${{ env.ENV }}/terraform.tfstate"
 
-      - name: Get EC2 public IP
+          terraform apply -auto-approve \
+            -var="environment=${{ env.ENV }}"
+
+      - name: Get EC2 public IP from Terraform output
         working-directory: terraform
         run: |
-          EC2_IP=$(terraform output -raw ec2_public_ip)
-                
-          if [ -z "$EC2_IP" ] || [ "$EC2_IP" == "null" ]; then
-            echo "ERROR: EC2_IP is empty. Check if 'output' is defined in .tf files."
-              exit 1
-          fi
-                
-          echo "EC2_IP=$EC2_IP" >> $GITHUB_ENV
+          EC2_IP=$(terraform output -raw ec2_public_ip 2>/dev/null || echo "")
 
-      - name: Verify EC2 IP
-        run: |
-          echo "EC2_IP from Env: [${{ env.EC2_IP }}]"
+          if [[ -z "$EC2_IP" || "$EC2_IP" == "null" ]]; then
+            echo "ERROR: Could not retrieve EC2 public IP from terraform output"
+            echo "Check that 'output "ec2_public_ip" { value = ... }' exists"
+            exit 1
+          fi
+
+          echo "EC2_IP=$EC2_IP" >> $GITHUB_ENV
+          echo "Deploying to EC2: $EC2_IP"
 
       - name: Prepare SSH key
         run: |
@@ -64,88 +72,70 @@ jobs:
           echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/ec2.pem
           chmod 600 ~/.ssh/ec2.pem
 
-      - name: Wait for EC2 SSH to be ready
+      - name: Wait for EC2 instance to accept SSH
         run: |
-          echo "Waiting for SSH on $EC2_IP..."
+          echo "Waiting for SSH on ${{ env.EC2_IP }} (max 5 minutes)..."
+
           for i in {1..30}; do
             if ssh -o StrictHostKeyChecking=no \
-                  -o ConnectTimeout=5 \
-                  -i ~/.ssh/ec2.pem \
-                  ubuntu@${EC2_IP} "echo SSH ready"; then
-              echo "SSH is ready!"
+                   -o ConnectTimeout=5 \
+                   -i ~/.ssh/ec2.pem \
+                   ubuntu@${{ env.EC2_IP }} "echo OK" >/dev/null 2>&1; then
+              echo "SSH connection ready"
               exit 0
             fi
-            echo "Still booting... retry in 10s"
+            printf "Attempt %02d - still waiting... retrying in 10s\n" $i
             sleep 10
           done
 
-          echo "ERROR: EC2 did not become ready in time"
-          exit 1
-      - name: Add EC2 to known_hosts
-        run: |
-          ssh-keyscan -H ${{ env.EC2_IP }} >> ~/.ssh/known_hosts
-
-      - name: Copy docker directory to EC2 (scp)
-        run: |
-          scp -i ~/.ssh/ec2.pem -r docker ubuntu@$EC2_IP:~/
-
-      - name: Set Docker tag
-        run: |
-          if [[ "${BRANCH_NAME}" == "main" || "${BRANCH_NAME}" == "master" ]]; then
-            echo "IMAGE_TAG=prod" >> $GITHUB_ENV
-          else
-            echo "IMAGE_TAG=${BRANCH_NAME}" >> $GITHUB_ENV
-          fi
-
-      - name: Deploy on EC2
-        run: |
-          # Wait for SSH to be ready (max 30 attempts)
-          echo "Waiting for SSH connection on ${{ env.EC2_IP }}..."
-          for i in {1..30}; do
-            if ssh -tt -o StrictHostKeyChecking=no \
-                  -o ConnectTimeout=5 \
-                  -o BatchMode=yes \
-                  -i ~/.ssh/ec2.pem \
-                  ubuntu@${{ env.EC2_IP }} "echo 'SSH ready'"; then
-              echo "SSH is ready!"
-              # SSH connection successful, now run deployment commands
-              ssh -tt -o StrictHostKeyChecking=no \
-                  -o BatchMode=yes \
-                  -i ~/.ssh/ec2.pem \
-                  ubuntu@${{ env.EC2_IP }} << 'EOF'
-              set -e
-              docker pull nhkyaw/visit-record-app:backend-${{ env.IMAGE_TAG }}
-              docker pull nhkyaw/visit-record-app:frontend-${{ env.IMAGE_TAG }}
-              docker compose down
-              docker compose --env-file .env.${{ env.IMAGE_TAG }} -f docker-compose.yaml up -d
-              EOF
-              exit 0
-            fi
-            echo "Attempt $i: SSH not ready yet, retry in 10s"
-            sleep 10
-          done
-          echo "ERROR: EC2 did not become ready in time"
+          echo "ERROR: EC2 SSH did not become available in time"
           exit 1
 
+      - name: Add host to known_hosts (optional but helps suppress warnings)
+        run: ssh-keyscan -H ${{ env.EC2_IP }} >> ~/.ssh/known_hosts || true
 
+      - name: Copy docker directory to EC2
+        run: scp -i ~/.ssh/ec2.pem -r docker/ ubuntu@${{ env.EC2_IP }}:~
 
+      - name: Determine Docker image tag
+        run: |
+          case "${{ env.BRANCH_NAME }}" in
+            main|master) echo "IMAGE_TAG=prod"      >> $GITHUB_ENV ;;
+            *)           echo "IMAGE_TAG=${{ env.BRANCH_NAME }}" >> $GITHUB_ENV ;;
+          esac
 
+      - name: Deploy application on EC2 via SSH
+        run: |
+          ssh -tt \
+            -o StrictHostKeyChecking=no \
+            -i ~/.ssh/ec2.pem \
+            ubuntu@${{ env.EC2_IP }} << 'EOF'
+            set -euo pipefail
 
-      # - name: Deploy to EC2
-      #   uses: appleboy/ssh-action@v1.0.3
-      #   with:
-      #     host: ${{ env.EC2_IP }}
-      #     username: ubuntu
-      #     key: ${{ secrets.EC2_SSH_KEY }}
-      #     envs: IMAGE_TAG,DOCKER_REPO   # add DOCKER_REPO if you use it
-      #     # script_path: docker/deploy.sh
-      #     script: |
-      #       set -e      
-            
-      #       docker pull ${DOCKER_REPO}:backend-${IMAGE_TAG}
-      #       docker pull ${DOCKER_REPO}:frontend-${IMAGE_TAG}
-            
-      #       docker compose down
-      #       docker compose --env-file .env.${IMAGE_TAG} -f docker-compose.yaml up -d
+            echo "Running deployment on $(hostname) - $(date)"
 
+            export IMAGE_TAG="${{ env.IMAGE_TAG }}"
+            export DOCKER_REPO="${{ env.DOCKER_REPO }}"
 
+            cd ~/docker || { echo "Directory ~/docker not found"; exit 2; }
+
+            echo "Docker version info:"
+            docker --version
+            docker compose version
+
+            echo "Pulling images..."
+            docker pull "${DOCKER_REPO}:backend-${IMAGE_TAG}"
+            docker pull "${DOCKER_REPO}:frontend-${IMAGE_TAG}"
+
+            echo "Starting deployment..."
+            docker compose down --remove-orphans || true
+
+            # Assumes you have .env.dev / .env.uat / .env.prod files already on the instance
+            docker compose \
+              --env-file ".env.${IMAGE_TAG}" \
+              -f docker-compose.yaml \
+              up -d --remove-orphans --force-recreate
+
+            echo "Deployment finished."
+            docker compose ps
+          EOF
