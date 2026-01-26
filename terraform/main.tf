@@ -109,13 +109,15 @@ resource "aws_instance" "visit_record_instance" {
   }
 }
 
-data "aws_eip" "by_allocation_id" {
-  id = "eipalloc-052d1997686125130"
+resource "aws_eip" "visit_record_eip" {
+  instance = aws_instance.visit_record_instance.id
+  domain   = "visit-record-eip"
 }
+
 
 resource "aws_eip_association" "eip_assoc" {
   instance_id   = aws_instance.visit_record_instance.id
-  allocation_id = data.aws_eip.by_allocation_id.id
+  allocation_id = aws_eip.visit_record_eip.id
 }
 
 terraform {

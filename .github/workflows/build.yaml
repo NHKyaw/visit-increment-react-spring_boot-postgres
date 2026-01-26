@@ -37,20 +37,20 @@ jobs:
       - name: Build & push backend
         if: ${{ inputs.stack == 'java' }}
         run: |
-          docker build -t $DOCKER_REPO:backend-${IMAGE_TAG} backend
-          docker push $DOCKER_REPO:backend-${IMAGE_TAG}
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/$DOCKER_REPO:backend-${IMAGE_TAG} backend
+          docker push ${{ secrets.DOCKER_USERNAME }}/$DOCKER_REPO:backend-${IMAGE_TAG}
 
       - name: Build & push frontend
         if: ${{ inputs.stack == 'react' }}
         run: |
-          docker build -t $DOCKER_REPO:frontend-${IMAGE_TAG} frontend
-          docker push $DOCKER_REPO:frontend-${IMAGE_TAG}
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/$DOCKER_REPO:frontend-${IMAGE_TAG} frontend
+          docker push ${{ secrets.DOCKER_USERNAME }}/$DOCKER_REPO:frontend-${IMAGE_TAG}
 
       - name: Check if image exists
         id: check-image
         run: |
-          FE_IMAGE_NAME="${{ secrets.DOCKERHUB_USERNAME }}/$DOCKER_REPO:frontend-${IMAGE_TAG}"
-          BE_IMAGE_NAME="${{ secrets.DOCKERHUB_USERNAME }}/$DOCKER_REPO:backend-${IMAGE_TAG}"
+          FE_IMAGE_NAME="${{ secrets.DOCKER_USERNAME }}/$DOCKER_REPO:frontend-${IMAGE_TAG}"
+          BE_IMAGE_NAME="${{ secrets.DOCKER_USERNAME }}/$DOCKER_REPO:backend-${IMAGE_TAG}"
 
           if docker manifest inspect "$FE_IMAGE_NAME" > /dev/null 2>&1; then
             echo "frontend_exists=true" >> $GITHUB_OUTPUT
