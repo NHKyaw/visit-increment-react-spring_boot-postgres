@@ -52,7 +52,7 @@ function App() {
   return (
     <div style={{ textAlign: 'center', padding: '50px', fontFamily: 'Arial' }}>
       <div style={{ padding: '30px', border: '1px solid #ddd', display: 'inline-block', borderRadius: '10px' }}>
-        <h1>CI/CD Test App (VMware)</h1>
+        <h1>CI/CD Test App</h1>
         <hr />
         <h2>Total Visits in Database:</h2>
         
