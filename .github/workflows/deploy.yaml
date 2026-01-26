@@ -82,13 +82,13 @@ jobs:
 
       - name: Run Docker Compose on EC2
         run: |
-          ssh -i ~/.ssh/ec2.pem ubuntu@${{ env.EC2_IP }} << EOF
-            set -e
-            cd ~/docker
+          ssh -i ~/.ssh/ec2.pem ubuntu@${EC2_IP} << EOF
+          set -e
+          cd ~/docker
 
-            docker pull ${{ env.DOCKER_REPO }}:backend-${IMAGE_TAG}
-            docker pull ${{ env.DOCKER_REPO }}:frontend-${IMAGE_TAG}
+          docker pull nhkyaw/visit-record-app:backend-${IMAGE_TAG}
+          docker pull nhkyaw/visit-record-app:frontend-${IMAGE_TAG}
 
-            docker compose down
-            docker compose --env-file .env.${IMAGE_TAG} -f docker-compose.yaml up -d
+          docker compose down
+          docker compose --env-file .env.${IMAGE_TAG} -f docker-compose.yaml up -d
           EOF
