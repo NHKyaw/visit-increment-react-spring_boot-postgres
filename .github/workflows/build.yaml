@@ -52,12 +52,19 @@ jobs:
           FE_IMAGE_NAME="${{ secrets.DOCKERHUB_USERNAME }}/$DOCKER_REPO:frontend-${IMAGE_TAG}"
           BE_IMAGE_NAME="${{ secrets.DOCKERHUB_USERNAME }}/$DOCKER_REPO:backend-${IMAGE_TAG}"
 
-          if docker manifest inspect $FE_IMAGE_NAME > /dev/null 2>&1; then
-            echo "exists=true" >> $GITHUB_OUTPUT
-            echo "✅ Image $IMAGE_NAME found in Docker Hub."
+          if docker manifest inspect "$FE_IMAGE_NAME" > /dev/null 2>&1; then
+            echo "frontend_exists=true" >> $GITHUB_OUTPUT
+            echo "✅ Frontend image exists"
           else
+            echo "frontend_exists=false" >> $GITHUB_OUTPUT
+            echo "❌ Frontend image NOT found"
+          fi
 
-          if docker manifest inspect $BE_IMAGE_NAME > /dev/null 2>&1; then
-            echo "exists=true" >> $GITHUB_OUTPUT
-            echo "✅ Image $BE_IMAGE_NAME found in Docker Hub."
+          if docker manifest inspect "$BE_IMAGE_NAME" > /dev/null 2>&1; then
+            echo "backend_exists=true" >> $GITHUB_OUTPUT
+            echo "✅ Backend image exists"
           else
+            echo "backend_exists=false" >> $GITHUB_OUTPUT
+            echo "❌ Backend image NOT found"   
+          fi
+        
