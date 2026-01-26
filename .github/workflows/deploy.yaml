@@ -82,19 +82,13 @@ jobs:
 
       - name: Run Docker Compose on EC2
         run: |
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/ec2.pem ubuntu@${EC2_IP} << EOF
-          set -e
-
-          export PATH="/usr/bin:/usr/local/bin:$PATH"
-
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/ec2.pem ubuntu@${EC2_IP} \
+          'bash -lc "
           cd ~/docker
-
           docker --version
           docker compose version
-
           docker pull nhkyaw/visit-record-app:backend-${IMAGE_TAG}
           docker pull nhkyaw/visit-record-app:frontend-${IMAGE_TAG}
-
           docker compose down
           docker compose --env-file .env.${IMAGE_TAG} -f docker-compose.yaml up -d
-          EOF
+          "'
