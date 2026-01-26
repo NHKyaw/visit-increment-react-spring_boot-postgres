@@ -97,19 +97,36 @@ jobs:
             echo "IMAGE_TAG=${BRANCH_NAME}" >> $GITHUB_ENV
           fi
 
+      # - name: Deploy to EC2
+      #   uses: appleboy/ssh-action@v1.0.3
+      #   with:
+      #     host: ${{ env.EC2_IP }}
+      #     username: ubuntu
+      #     key: ${{ secrets.EC2_SSH_KEY }}
+      #     envs: IMAGE_TAG,DOCKER_REPO   # add DOCKER_REPO if you use it
+      #     # script_path: docker/deploy.sh
+      #     script: |
+      #       set -e      
+            
+      #       docker pull ${DOCKER_REPO}:backend-${IMAGE_TAG}
+      #       docker pull ${DOCKER_REPO}:frontend-${IMAGE_TAG}
+            
+      #       docker compose down
+      #       docker compose --env-file .env.${IMAGE_TAG} -f docker-compose.yaml up -d
+
+
       - name: Deploy to EC2
-        uses: appleboy/ssh-action@v1.0.3
+        uses: fifsky/ssh-action@master
         with:
           host: ${{ env.EC2_IP }}
-          username: ubuntu
+          user: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
-          envs: IMAGE_TAG,DOCKER_REPO   # add DOCKER_REPO if you use it
-          # script_path: docker/deploy.sh
-          script: |
-            set -e      
+          command: |
+            set -e
+            cd ~/docker
             
-            docker pull ${DOCKER_REPO}:backend-${IMAGE_TAG}
-            docker pull ${DOCKER_REPO}:frontend-${IMAGE_TAG}
+            docker pull ${{ env.DOCKER_REPO }}:backend-${{ env.IMAGE_TAG }}
+            docker pull ${{ env.DOCKER_REPO }}:frontend-${{ env.IMAGE_TAG }}
             
             docker compose down
-            docker compose --env-file .env.${IMAGE_TAG} -f docker-compose.yaml up -d
+            docker compose --env-file .env.${{ env.ENV }} -f docker-compose.yaml up -d
