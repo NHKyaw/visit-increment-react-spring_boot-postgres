@@ -100,7 +100,7 @@ resource "aws_instance" "visit_record_instance" {
   key_name                    = var.visit_increment_key_name
   vpc_security_group_ids      = [aws_security_group.visit_record_sg.id]
   subnet_id                   = aws_subnet.visit_record_subnet.id
-  associate_public_ip_address = true
+  associate_public_ip_address = false
 
   user_data = file("userdata.sh")
 
@@ -109,6 +109,14 @@ resource "aws_instance" "visit_record_instance" {
   }
 }
 
+data "aws_eip" "by_allocation_id" {
+  id = "eipalloc-052d1997686125130"
+}
+
+resource "aws_eip_association" "eip_assoc" {
+  instance_id   = aws_instance.visit_record_instance.id
+  allocation_id = data.aws_eip.by_allocation_id.id
+}
 
 terraform {
   backend "s3" {

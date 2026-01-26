@@ -1,0 +1,93 @@
+env:
+  BRANCH_NAME: ${{ github.ref_name }}
+  DOCKER_REPO: nhkyaw/visit-record-app
+
+on:
+  workflow_call:
+
+jobs: 
+  deploy:
+    runs-on: ubuntu-latest
+    if: github.ref_name == 'dev' || github.ref_name == 'uat' || github.ref_name == 'main' || github.ref_name == 'master'
+
+    steps:
+      - name: Map branch to environment #$GITHUB_ENV is a special file that sets environment variables for future steps in a job.
+        run: |
+          if [[ "${GITHUB_REF_NAME}" == "main" ]]; then
+            echo "ENV=prod" >> $GITHUB_ENV
+          else
+            echo "ENV=${GITHUB_REF_NAME}" >> $GITHUB_ENV
+          fi
+
+      - name: checkout code
+        uses: actions/checkout@v4   
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_wrapper: false
+
+      - name: Terraform apply
+        working-directory: terraform
+        run: |
+          terraform init -backend-config="key=env/${ENV}/terraform.tfstate"
+          terraform apply -auto-approve -var="environment=${ENV}"
+          # terraform destroy -auto-approve -var="environment=${{ inputs.environment }}" # Delete this line if not needed!Temporary Purpose#########
+
+      - name: Get EC2 public IP
+        working-directory: terraform
+        run: |
+          EC2_IP=$(terraform output -raw ec2_public_ip)
+                
+          if [ -z "$EC2_IP" ] || [ "$EC2_IP" == "null" ]; then
+            echo "ERROR: EC2_IP is empty. Check if 'output' is defined in .tf files."
+              exit 1
+          fi
+                
+          echo "EC2_IP=$EC2_IP" >> $GITHUB_ENV
+
+      - name: Verify EC2 IP
+        run: |
+          echo "EC2_IP from Env: [${{ env.EC2_IP }}]"
+
+      - name: Prepare SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/ec2.pem
+          chmod 600 ~/.ssh/ec2.pem
+
+      - name: Add EC2 to known_hosts
+        run: |
+          ssh-keyscan -H ${{ env.EC2_IP }} >> ~/.ssh/known_hosts
+
+      - name: Copy docker directory to EC2 (scp)
+        run: |
+          scp -i ~/.ssh/ec2.pem -r docker ubuntu@$EC2_IP:~/
+
+      - name: Set Docker tag
+        run: |
+          if [[ "${BRANCH_NAME}" == "main" || "${BRANCH_NAME}" == "master" ]]; then
+            echo "IMAGE_TAG=prod" >> $GITHUB_ENV
+          else
+            echo "IMAGE_TAG=${BRANCH_NAME}" >> $GITHUB_ENV
+          fi
+
+      - name: Run Docker Compose on EC2
+        run: |
+          ssh -i ~/.ssh/ec2.pem ubuntu@${{ env.EC2_IP }} << EOF
+            set -e
+            cd ~/docker
+
+            docker pull ${{ env.DOCKER_REPO }}:backend-${IMAGE_TAG}
+            docker pull ${{ env.DOCKER_REPO }}:frontend-${IMAGE_TAG}
+
+            docker compose down
+            docker compose --env-file .env.${IMAGE_TAG} -f docker-compose.yaml up -d
+          EOF

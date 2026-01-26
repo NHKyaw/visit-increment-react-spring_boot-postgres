@@ -1,0 +1,28 @@
+name: Full Pipeline
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  # 1. BUILD PHASE
+  build-java:
+    uses: ./.github/workflows/build.yaml
+    with:
+      stack: 'java'
+
+  build-react:
+    uses: ./.github/workflows/build.yaml
+    with:
+      stack: 'react'
+
+  # 2. TEST PHASE (Runs only if Build succeeds)
+  test-app:
+    needs: [build-java, build-react]
+    uses: ./.github/workflows/test.yaml
+
+  # 3. DEPLOY PHASE (Runs only if Tests succeed)
+  deploy-app:
+    needs: [test-app]
+    uses: ./.github/workflows/deploy.yaml
+    secrets: inherit # Pass secrets like AWS_ACCESS_KEY to the child
