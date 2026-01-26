@@ -54,7 +54,7 @@ function App() {
       <div style={{ padding: '30px', border: '1px solid #ddd', display: 'inline-block', borderRadius: '10px' }}>
         <h1>CI/CD Test App</h1>
         <hr />
-        <h2>Total Visits in Database:</h2>
+        <h2>Total Visits in Our Database:</h2>
         
         {loading ? (
           <p>Loading...</p>
