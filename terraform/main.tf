@@ -116,7 +116,6 @@ resource "aws_eip" "visit_record_eip" {
 
 
 resource "aws_eip_association" "eip_assoc" {
-  instance_id   = aws_instance.visit_record_instance.id
   allocation_id = aws_eip.visit_record_eip.id
 }
 
