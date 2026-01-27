@@ -155,20 +155,20 @@ jobs:
           host: ${{ env.EC2_IP }}
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
-          envs: IMAGE_TAG,DOCKER_REPO   # add DOCKER_REPO if you use it
-          # script_path: docker/deploy.sh
-          script: |
-            set -e      
-            pwd
-            printenv | grep -i IMAGE_TAG
-            cd ~/docker
-            pwd
-            sudo docker --version
-            sudo docker compose version
-            sudo docker pull ${DOCKER_REPO}:backend-${IMAGE_TAG}
-            sudo docker pull ${DOCKER_REPO}:frontend-${IMAGE_TAG}
+          envs: IMAGE_TAG,DOCKER_REPO 
+          script_path: docker/deploy.sh
+          # script: |
+          #   set -e      
+          #   pwd
+          #   printenv | grep -i IMAGE_TAG
+          #   cd ~/docker
+          #   pwd
+          #   sudo docker --version
+          #   sudo docker compose version
+          #   sudo docker pull ${DOCKER_REPO}:backend-${IMAGE_TAG}
+          #   sudo docker pull ${DOCKER_REPO}:frontend-${IMAGE_TAG}
             
-            sudo docker compose down
-            sudo docker compose --env-file .env.${IMAGE_TAG} -f docker-compose.yaml up -d
+          #   sudo docker compose down
+          #   sudo docker compose --env-file .env.${IMAGE_TAG} -f docker-compose.yaml up -d
 
 

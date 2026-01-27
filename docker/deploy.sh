@@ -1,43 +1,18 @@
 #!/bin/bash
-set -Eeuo pipefail
-set -x   # 🔥 SHOW EVERY COMMAND
-
-echo "===== CONTEXT ====="
-date
-hostname
+set -euo pipefail
 id
 whoami
 groups
+printenv | grep -i IMAGE_TAG || (echo "IMAGE_TAG is not set")
 
-echo "===== ENV ====="
-printenv | grep -i IMAGE_TAG || echo "IMAGE_TAG is not set"
+# sudo usermod -aG docker $USER || echo "Failed to add $USER to docker group"
+# echo "Using docker at: $(which docker)"
+# /usr/bin/docker --version
+# /usr/bin/docker --version
+# /usr/bin/docker compose version
 
-: "${IMAGE_TAG:?IMAGE_TAG is required}"
+# /usr/bin/docker pull nhkyaw/visit-record-app:backend-${IMAGE_TAG}
+# /usr/bin/docker pull nhkyaw/visit-record-app:frontend-${IMAGE_TAG}
 
-echo "===== DOCKER CHECK ====="
-which docker
-/usr/bin/docker --version
-/usr/bin/docker compose version
-
-echo "===== PULL BACKEND IMAGE ====="
-/usr/bin/docker pull nhkyaw/visit-record-app:backend-${IMAGE_TAG} | tee /tmp/backend_pull.log
-echo "✔ Backend image pulled"
-
-echo "===== PULL FRONTEND IMAGE ====="
-/usr/bin/docker pull nhkyaw/visit-record-app:frontend-${IMAGE_TAG} | tee /tmp/frontend_pull.log
-echo "✔ Frontend image pulled"
-
-echo "===== COMPOSE DOWN ====="
-/usr/bin/docker compose down
-echo "✔ Containers stopped"
-
-echo "===== COMPOSE UP ====="
-/usr/bin/docker compose \
-  --env-file .env.${IMAGE_TAG} \
-  -f docker-compose.yaml \
-  up -d | tee /tmp/compose_up.log
-
-echo "✔ Deployment completed"
-
-echo "===== RUNNING CONTAINERS ====="
-/usr/bin/docker ps
+# /usr/bin/docker compose down
+# /usr/bin/docker compose --env-file .env.${IMAGE_TAG} -f docker-compose.yaml up -d
