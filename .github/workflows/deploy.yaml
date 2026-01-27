@@ -164,10 +164,11 @@ jobs:
             set -e
             whoami >> /home/ubuntu/docker/data.log      
             pwd >> /home/ubuntu/docker/data.log
+            groups >> /home/ubuntu/docker/data.log
             printenv | grep -i IMAGE_TAG && echo "IMAGE_TAG is set" >> /home/ubuntu/docker/data.log || echo "IMAGE_TAG not set" >> /home/ubuntu/docker/data.log
             pwd >> /home/ubuntu/docker/data.log
-            docker --version >> /home/ubuntu/docker/data.log
-            docker compose version >> /home/ubuntu/docker/data.log
+            sudo /usr/bin/docker --version >> /home/ubuntu/docker/data.log
+            sudo /usr/bin/docker compose version >> /home/ubuntu/docker/data.log
 
             sudo chmod +x /home/ubuntu/docker/deploy.sh
             /home/ubuntu/docker/deploy.sh
