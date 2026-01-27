@@ -1,15 +1,18 @@
 #!/bin/bash
 set -euo pipefail
+id
+whoami
+groups
+printenv | grep -i IMAGE_TAG || (echo "IMAGE_TAG is not set")
 
-# Ensure PATH for non-interactive shells
-export PATH="/usr/bin:/usr/local/bin:/snap/bin:$PATH"
-
+sudo usermod -aG docker $USER || echo "Failed to add $USER to docker group"
 echo "Using docker at: $(which docker)"
-docker --version
-docker compose version
+usr/bin/docker --version
+usr/bin/docker --version
+usr/bin/docker compose version
 
-docker pull nhkyaw/visit-record-app:backend-${IMAGE_TAG}
-docker pull nhkyaw/visit-record-app:frontend-${IMAGE_TAG}
+usr/bin/docker pull nhkyaw/visit-record-app:backend-${IMAGE_TAG}
+usr/bin/docker pull nhkyaw/visit-record-app:frontend-${IMAGE_TAG}
 
-docker compose down
-docker compose --env-file .env.${IMAGE_TAG} -f docker-compose.yaml up -d
+usr/bin/docker compose down
+usr/bin/docker compose --env-file .env.${IMAGE_TAG} -f docker-compose.yaml up -d

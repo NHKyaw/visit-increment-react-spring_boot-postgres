@@ -97,73 +97,77 @@ jobs:
             echo "IMAGE_TAG=${BRANCH_NAME}" >> $GITHUB_ENV
           fi
 
-      - name: Deploy on EC2
-        run: |
-          echo "Waiting for SSH connection on $EC2_IP..."
+      # - name: Deploy on EC2
+      #   run: |
+      #     echo "Waiting for SSH connection on $EC2_IP..."
 
-          for i in $(seq 1 30); do
-            if ssh -T \
-              -o StrictHostKeyChecking=no \
-              -o ConnectTimeout=5 \
-              -o BatchMode=yes \
-              -i ~/.ssh/ec2.pem \
-              ubuntu@$EC2_IP "echo SSH ready"; then
+      #     for i in $(seq 1 30); do
+      #       if ssh -T \
+      #         -o StrictHostKeyChecking=no \
+      #         -o ConnectTimeout=5 \
+      #         -o BatchMode=yes \
+      #         -i ~/.ssh/ec2.pem \
+      #         ubuntu@$EC2_IP "echo SSH ready"; then
 
-              echo "SSH is ready!"
+      #         echo "SSH is ready!"
 
-              ssh -T \
-                -o StrictHostKeyChecking=no \
-                -o BatchMode=yes \
-                -i ~/.ssh/ec2.pem \
-                ubuntu@$EC2_IP << 'EOF'
-              set -e
+      #         ssh -T \
+      #           -o StrictHostKeyChecking=no \
+      #           -o BatchMode=yes \
+      #           -i ~/.ssh/ec2.pem \
+      #           ubuntu@$EC2_IP << 'EOF'
+      #         set -e
 
-              export PATH="/usr/bin:/usr/local/bin:/snap/bin:$PATH"
+      #         export PATH="/usr/bin:/usr/local/bin:/snap/bin:$PATH"
 
-              cd ~/docker
+      #         cd ~/docker
 
-              docker --version
-              docker compose version
+      #         docker --version
+      #         docker compose version
 
-              echo "Deploying IMAGE_TAG=$IMAGE_TAG"
+      #         echo "Deploying IMAGE_TAG=$IMAGE_TAG"
 
-              docker pull nhkyaw/visit-record-app:backend-$IMAGE_TAG
-              docker pull nhkyaw/visit-record-app:frontend-$IMAGE_TAG
+      #         docker pull nhkyaw/visit-record-app:backend-$IMAGE_TAG
+      #         docker pull nhkyaw/visit-record-app:frontend-$IMAGE_TAG
 
-              docker compose down
-              docker compose --env-file .env.$IMAGE_TAG -f docker-compose.yaml up -d
-              EOF
+      #         docker compose down
+      #         docker compose --env-file .env.$IMAGE_TAG -f docker-compose.yaml up -d
+      #         EOF
 
-              exit 0
-            fi
+      #         exit 0
+      #       fi
 
-            echo "Attempt $i: SSH not ready yet, retrying in 10s..."
-            sleep 10
-          done
+      #       echo "Attempt $i: SSH not ready yet, retrying in 10s..."
+      #       sleep 10
+      #     done
 
-          echo "ERROR: EC2 did not become ready in time"
-          exit 1
-
-
+      #     echo "ERROR: EC2 did not become ready in time"
+      #     exit 1
 
 
 
 
-      # - name: Deploy to EC2
-      #   uses: appleboy/ssh-action@v1.0.3
-      #   with:
-      #     host: ${{ env.EC2_IP }}
-      #     username: ubuntu
-      #     key: ${{ secrets.EC2_SSH_KEY }}
-      #     envs: IMAGE_TAG,DOCKER_REPO   # add DOCKER_REPO if you use it
-      #     # script_path: docker/deploy.sh
-      #     script: |
-      #       set -e      
+
+
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ env.EC2_IP }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          envs: IMAGE_TAG,DOCKER_REPO   # add DOCKER_REPO if you use it
+          # script_path: docker/deploy.sh
+          script: |
+            set -e      
+            pwd
+            cd ~/docker
+            pwd
+            docker --version
+            docker compose version
+            docker pull ${DOCKER_REPO}:backend-${IMAGE_TAG}
+            docker pull ${DOCKER_REPO}:frontend-${IMAGE_TAG}
             
-      #       docker pull ${DOCKER_REPO}:backend-${IMAGE_TAG}
-      #       docker pull ${DOCKER_REPO}:frontend-${IMAGE_TAG}
-            
-      #       docker compose down
-      #       docker compose --env-file .env.${IMAGE_TAG} -f docker-compose.yaml up -d
+            docker compose down
+            docker compose --env-file .env.${IMAGE_TAG} -f docker-compose.yaml up -d
 
 

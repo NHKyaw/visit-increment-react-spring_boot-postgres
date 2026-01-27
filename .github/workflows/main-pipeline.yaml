@@ -30,4 +30,4 @@ jobs:
   deploy-app:
     needs: [build-java, build-react]
     uses: ./.github/workflows/deploy.yaml
-    secrets: inherit # Pass secrets like AWS_ACCESS_KEY to the child
+    secrets: inherit 
