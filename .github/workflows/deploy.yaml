@@ -166,7 +166,7 @@ jobs:
             printenv | grep -i IMAGE_TAG || echo "IMAGE_TAG not set" >> /home/ubuntu/docker/data.log
             pwd >> /home/ubuntu/docker/data.log
             sudo docker --version >> /home/ubuntu/docker/data.log
-            sudo docker compose version >> >> /home/ubuntu/docker/data.log
+            sudo docker compose version >> /home/ubuntu/docker/data.log
 
             cd /home/ubuntu/docker/docker/ && sudo chmod +x /home/ubuntu/docker/deploy.sh
             sudo /home/ubuntu/docker/deploy.sh
