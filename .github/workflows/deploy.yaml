@@ -163,12 +163,12 @@ jobs:
           script: |
             set -e      
             pwd >> /home/ubuntu/docker/data.log
-            printenv | grep -i IMAGE_TAG || echo "IMAGE_TAG not set" >> /home/ubuntu/docker/data.log
+            printenv | grep -i IMAGE_TAG && echo "IMAGE_TAG is set" >> /home/ubuntu/docker/data.log || echo "IMAGE_TAG not set" >> /home/ubuntu/docker/data.log
             pwd >> /home/ubuntu/docker/data.log
             sudo docker --version >> /home/ubuntu/docker/data.log
             sudo docker compose version >> /home/ubuntu/docker/data.log
 
-            cd /home/ubuntu/docker/docker/ && sudo chmod +x /home/ubuntu/docker/deploy.sh
+            cd /home/ubuntu/docker/ && sudo chmod +x /home/ubuntu/docker/deploy.sh
             sudo /home/ubuntu/docker/deploy.sh
             # sudo docker pull ${DOCKER_REPO}:backend-${IMAGE_TAG}
             # sudo docker pull ${DOCKER_REPO}:frontend-${IMAGE_TAG}
