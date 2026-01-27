@@ -162,15 +162,14 @@ jobs:
           # script_path: deploy.sh
           script: |
             set -e      
-            pwd
-            printenv | grep -i IMAGE_TAG
-            cd ~/docker
-            pwd
-            sudo docker --version
-            sudo docker compose version
+            pwd >> /home/ubuntu/docker/data.log
+            printenv | grep -i IMAGE_TAG || echo "IMAGE_TAG not set" >> /home/ubuntu/docker/data.log
+            pwd >> /home/ubuntu/docker/data.log
+            sudo docker --version >> /home/ubuntu/docker/data.log
+            sudo docker compose version >> >> /home/ubuntu/docker/data.log
 
-            cd ~/docker && sudo chmod +x deploy.sh
-            sudo ./deploy.sh
+            cd /home/ubuntu/docker/docker/ && sudo chmod +x /home/ubuntu/docker/deploy.sh
+            sudo /home/ubuntu/docker/deploy.sh
             # sudo docker pull ${DOCKER_REPO}:backend-${IMAGE_TAG}
             # sudo docker pull ${DOCKER_REPO}:frontend-${IMAGE_TAG}
             
