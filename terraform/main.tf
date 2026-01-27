@@ -114,6 +114,8 @@ resource "aws_instance" "visit_record_instance" {
   ami           = var.ami_id
   instance_type = local.instance_type
   key_name      = var.visit_increment_key_name
+  user_data_replace_on_change = true
+
 
   network_interface {
     network_interface_id = aws_network_interface.visit_record_eni.id
