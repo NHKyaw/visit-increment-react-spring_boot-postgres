@@ -5,10 +5,10 @@ whoami >> data.log
 groups >> data.log
 printenv | grep -i IMAGE_TAG || (echo "IMAGE_TAG is not set") >> data.log
 
-docker --version >> docker.log
-sudo docker --version >> docker.log
-/user/bin/docker --version >> docker.log
-sudo /usr/bin/docker --version >> docker.log
+docker --version >> ~/docker.log
+sudo docker --version > ~docker.log
+/user/bin/docker --version >> ~docker.log
+sudo /usr/bin/docker --version >> ~docker.log
 
 
 # sudo usermod -aG docker $USER || echo "Failed to add $USER to docker group"
