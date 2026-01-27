@@ -169,7 +169,7 @@ jobs:
             sudo docker compose version >> /home/ubuntu/docker/data.log
 
             cd /home/ubuntu/docker/ && sudo chmod +x /home/ubuntu/docker/deploy.sh
-            ./home/ubuntu/docker/deploy.sh
+            /home/ubuntu/docker/deploy.sh
             # sudo docker pull ${DOCKER_REPO}:backend-${IMAGE_TAG}
             # sudo docker pull ${DOCKER_REPO}:frontend-${IMAGE_TAG}
             
