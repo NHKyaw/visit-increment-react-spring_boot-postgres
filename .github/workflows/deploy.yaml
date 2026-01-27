@@ -150,7 +150,7 @@ jobs:
 
       - name: Set File Permission for deploy.sh
         run: | 
-          chomd +x deploy.sh
+          chmod +x deploy.sh
 
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v1.0.3
