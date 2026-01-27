@@ -156,7 +156,7 @@ jobs:
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           envs: IMAGE_TAG,DOCKER_REPO   # add DOCKER_REPO if you use it
-          script_path: docker/deploy.sh
+          # script_path: docker/deploy.sh
           script: |
             set -e      
             pwd
