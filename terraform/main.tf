@@ -98,8 +98,6 @@ resource "aws_instance" "visit_record_instance" {
   ami           = "ami-08d59269edddde222"
   instance_type = var.instance_type
   key_name      = var.visit_increment_key_name
-  map_public_ip_on_launch = true
-
 
   network_interface {
     network_interface_id = aws_network_interface.visit_record_eni.id
