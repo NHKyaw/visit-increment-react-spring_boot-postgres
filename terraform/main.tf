@@ -95,12 +95,16 @@ resource "aws_security_group" "visit_record_sg" {
 }
 
 resource "aws_instance" "visit_record_instance" {
-  ami                         = "ami-08d59269edddde222" # Ubuntu 22.04 (change per region)
-  instance_type               = var.instance_type
-  key_name                    = var.visit_increment_key_name
-  vpc_security_group_ids      = [aws_security_group.visit_record_sg.id]
-  subnet_id                   = aws_subnet.visit_record_subnet.id
-  associate_public_ip_address = false
+  ami           = "ami-08d59269edddde222"
+  instance_type = var.instance_type
+  key_name      = var.visit_increment_key_name
+  map_public_ip_on_launch = false
+
+
+  network_interface {
+    network_interface_id = aws_network_interface.visit_record_eni.id
+    device_index         = 0
+  }
 
   user_data = file("userdata.sh")
 
@@ -109,14 +113,28 @@ resource "aws_instance" "visit_record_instance" {
   }
 }
 
+
+resource "aws_network_interface" "visit_record_eni" {
+  subnet_id       = aws_subnet.visit_record_subnet.id
+  security_groups = [aws_security_group.visit_record_sg.id]
+
+  tags = {
+    Name = "visit-record-eni"
+  }
+}
+
+
 resource "aws_eip" "visit_record_eip" {
   domain   = "vpc"
 }
 
 
 resource "aws_eip_association" "eip_assoc" {
-  instance_id   = aws_instance.visit_record_instance.id
+  network_interface_id = aws_network_interface.visit_record_eni.id
   allocation_id = aws_eip.visit_record_eip.id
+    depends_on = [
+    aws_instance.visit_record_instance
+  ]
 }
 
 terraform {
