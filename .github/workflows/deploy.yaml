@@ -169,7 +169,7 @@ jobs:
             sudo docker --version
             sudo docker compose version
 
-            sudo chmod +x deploy.sh
+            cd ~/docker && sudo chmod +x deploy.sh
             sudo ./deploy.sh
             # sudo docker pull ${DOCKER_REPO}:backend-${IMAGE_TAG}
             # sudo docker pull ${DOCKER_REPO}:frontend-${IMAGE_TAG}
