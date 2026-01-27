@@ -4,7 +4,8 @@ resource "aws_vpc" "visit_record_vpc" {
   enable_dns_support   = true
   instance_tenancy     = "default"
   tags = {
-    Name = "visit-record-vpc"
+    Name        = "visit-record-vpc-${var.environment}"
+    Environment = var.environment
   }
 }
 
@@ -12,7 +13,8 @@ resource "aws_internet_gateway" "visit_record_gw" {
   vpc_id = aws_vpc.visit_record_vpc.id
 
   tags = {
-    Name = "visit-record-igw"
+    Name        = "visit-record-igw-${var.environment}"
+    Environment = var.environment
   }
 }
 
@@ -21,7 +23,8 @@ resource "aws_subnet" "visit_record_subnet" {
   cidr_block              = "10.0.1.0/24"
   map_public_ip_on_launch = true
   tags = {
-    Name = "visit-record-subnet"
+    Name        = "visit-record-subnet-${var.environment}"
+    Environment = var.environment
   }
 }
 
@@ -34,7 +37,8 @@ resource "aws_route_table" "public_rt" {
   }
 
   tags = {
-    Name = "visit-record-public-rt"
+    Name        = "visit-record-public-rt-${var.environment}"
+    Environment = var.environment
   }
 }
 resource "aws_route_table_association" "public_rt_association" {
@@ -43,7 +47,7 @@ resource "aws_route_table_association" "public_rt_association" {
 }
 
 resource "aws_security_group" "visit_record_sg" {
-  name   = "visit-record-sg"
+  name   = "visit-record-sg-${var.environment}"
   vpc_id = aws_vpc.visit_record_vpc.id
 
   ingress {
@@ -90,13 +94,25 @@ resource "aws_security_group" "visit_record_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
   tags = {
-    Name = "visit-record-sg"
+    Name        = "visit-record-sg-${var.environment}"
+    Environment = var.environment
   }
 }
 
+
+locals {
+  instance_type_map = {
+    dev  = "t2.micro"
+    uat  = "t2.small"
+    prod = "t3.medium"
+  }
+
+  instance_type = local.instance_type_map[var.environment]
+}
+
 resource "aws_instance" "visit_record_instance" {
-  ami           = "ami-08d59269edddde222"
-  instance_type = var.instance_type
+  ami           = var.ami_id
+  instance_type = local.instance_type
   key_name      = var.visit_increment_key_name
 
   network_interface {
@@ -117,20 +133,25 @@ resource "aws_network_interface" "visit_record_eni" {
   security_groups = [aws_security_group.visit_record_sg.id]
 
   tags = {
-    Name = "visit-record-eni"
+    Name        = "visit-record-eni-${var.environment}"
+    Environment = var.environment
   }
 }
 
 
 resource "aws_eip" "visit_record_eip" {
-  domain   = "vpc"
+  domain = "vpc"
+  tags = {
+    Name        = "visit-record-eip-${var.environment}"
+    Environment = var.environment
+  }
 }
 
 
 resource "aws_eip_association" "eip_assoc" {
   network_interface_id = aws_network_interface.visit_record_eni.id
-  allocation_id = aws_eip.visit_record_eip.id
-    depends_on = [
+  allocation_id        = aws_eip.visit_record_eip.id
+  depends_on = [
     aws_instance.visit_record_instance
   ]
 }

@@ -40,7 +40,7 @@ jobs:
         working-directory: terraform
         run: |
           terraform init -backend-config="key=env/${ENV}/terraform.tfstate"
-          terraform apply -auto-approve -var="environment=${ENV}"
+          terraform apply -auto-approve -var-file="${ENV}.tfvars"
 
       - name: Get EC2 public IP
         working-directory: terraform

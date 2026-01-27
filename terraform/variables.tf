@@ -1,19 +1,34 @@
-variable "region" {
+variable "environment" {
+  description = "Environment name"
+  type        = string
+
+  validation {
+    condition     = contains(["dev", "uat", "prod"], var.environment)
+    error_message = "environment must be dev, uat, or prod"
+  }
+}
+
+variable "aws_region" {
+  type    = string
   default = "ap-southeast-1"
 }
 
-variable "visit_increment_key_name" {
-  description = "EC2 key pair name"
-  default     = "visit_increment"
-  type        = string
+variable "ami_id" {
+  type = string
 }
 
-variable "instance_type" {
-  description = "EC2 instance type"
-  type        = string
-  default     = "t2.micro"
+variable "visit_increment_key_name" {
+  type = string
 }
-variable "environment" {
-  description = "Deployment environment"
-  type        = string
+
+variable "vpc_cidr" {
+  type = string
+}
+
+variable "public_subnet_cidr" {
+  type = string
+}
+
+variable "ssh_cidr" {
+  type = list(string)
 }
