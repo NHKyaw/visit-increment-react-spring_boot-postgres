@@ -4,13 +4,12 @@ on:
   workflow_dispatch:
     inputs:
       environment:
-        description: "Environment to destroy (dev / uat / prod)"
+        description: "Environment to destroy (dev / uat )"
         required: true
         type: choice
         options:
           - dev
           - uat
-          - prod
       confirm:
         description: "Type DESTROY to confirm"
         required: true
@@ -49,4 +48,5 @@ jobs:
         run: |
           terraform init -backend-config="key=env/${{ inputs.environment }}/terraform.tfstate"
           terraform destroy \
+            -auto-approve \
             -var="environment=${{ inputs.environment }}"
