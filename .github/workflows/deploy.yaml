@@ -41,8 +41,7 @@ jobs:
         run: |
           terraform init -backend-config="key=env/${ENV}/terraform.tfstate"
           terraform apply -auto-approve -var-file="${ENV}.tfvars"
-          terraform destroy -auto-approve -var-file="${ENV}.tfvars" #Temporary until TF code is stable
-
+  
       - name: Get EC2 public IP
         working-directory: terraform
         run: |
