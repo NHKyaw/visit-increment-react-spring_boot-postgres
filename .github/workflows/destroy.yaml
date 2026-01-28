@@ -49,4 +49,4 @@ jobs:
           terraform init -backend-config="key=env/${{ inputs.environment }}/terraform.tfstate"
           terraform destroy \
             -auto-approve \
-            -var="environment=${{ inputs.environment }}"
+            -var-file="${ENV}.tfvars"
