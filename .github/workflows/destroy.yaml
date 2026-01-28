@@ -50,3 +50,5 @@ jobs:
           terraform destroy \
             -auto-approve \
             -var-file="${ENV}.tfvars"
+
+          echo "✅ Terraform destroy completed for environment: ${{ inputs.environment }}"
