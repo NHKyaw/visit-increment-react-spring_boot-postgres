@@ -6,7 +6,7 @@ function App() {
   
   // 1. Run 'ip addr' in your VMware terminal
   // 2. Replace the IP below with your actual VM IP address
-  const VM_IP = "3.0.142.44"; 
+  const VM_IP = "3.1.108.202"; 
   const BASE_URL = `http://${VM_IP}:8080/api/visit`;
 
   const refreshCount = async () => {
@@ -52,7 +52,7 @@ function App() {
   return (
     <div style={{ textAlign: 'center', padding: '50px', fontFamily: 'Arial' }}>
       <div style={{ padding: '30px', border: '1px solid #ddd', display: 'inline-block', borderRadius: '10px' }}>
-        <h1>CI/CD Test App:Prod:v1</h1>
+        <h1>CI/CD Test App:UAT:v1</h1>
         <hr />
         <h2>Total Visits in Our Database:</h2>
         

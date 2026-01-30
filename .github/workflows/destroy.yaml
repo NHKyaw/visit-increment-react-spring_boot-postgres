@@ -57,3 +57,5 @@ jobs:
           terraform destroy \
             -auto-approve \
             -var="environment=${ENV}"
+
+          echo "✅ Terraform destroy completed for environment: ${ENV}"
