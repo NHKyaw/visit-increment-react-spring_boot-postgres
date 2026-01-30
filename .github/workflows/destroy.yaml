@@ -56,6 +56,6 @@ jobs:
           terraform init -backend-config="key=env/${ENV}/terraform.tfstate"
           terraform destroy \
             -auto-approve \
-            -var="environment=${ENV}"
+            -var-file="${ENV}.tfvars"
 
           echo "✅ Terraform destroy completed for environment: ${ENV}"
