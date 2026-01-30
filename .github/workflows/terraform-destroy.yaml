@@ -4,13 +4,13 @@ on:
   workflow_dispatch:
     inputs:
       environment:
-        description: "Environment to destroy (dev / uat / prod)"
+        description: "Environment to destroy (dev / uat / main)"
         required: true
         type: choice
         options:
           - dev
           - uat
-          - prod
+          - main
       confirm:
         description: "Type DESTROY to confirm"
         required: true
@@ -18,8 +18,6 @@ on:
 jobs:
   destroy:
     runs-on: ubuntu-latest
-
-    # 🔒 Approval gate (explained below)
     environment: terraform-destroy
 
     steps:
@@ -44,9 +42,18 @@ jobs:
         with:
           terraform_wrapper: false
 
+      - name: Map branch to environment #$GITHUB_ENV is a special file that sets environment variables for future steps in a job.
+        run: |
+          if [[ "${GITHUB_REF_NAME}" == "main" ]]; then
+            echo "ENV=prod" >> $GITHUB_ENV
+          else
+            echo "ENV=${GITHUB_REF_NAME}" >> $GITHUB_ENV
+          fi
+
       - name: Terraform destroy
         working-directory: terraform
         run: |
-          terraform init -backend-config="key=env/${{ inputs.environment }}/terraform.tfstate"
+          terraform init -backend-config="key=env/${ENV}/terraform.tfstate"
           terraform destroy \
-            -var="environment=${{ inputs.environment }}"
+            -auto-approve \
+            -var="environment=${ENV}"

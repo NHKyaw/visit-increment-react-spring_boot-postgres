@@ -2,7 +2,7 @@ name: Full Pipeline
 
 on:
   push:
-    branches: [main]
+    branches: [dev,uat,main]
 
 jobs:
 
