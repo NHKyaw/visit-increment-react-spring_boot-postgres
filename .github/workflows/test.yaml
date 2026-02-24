@@ -65,7 +65,7 @@ jobs:
         working-directory: frontend
         run: |
           npm install
-          npm test -- --watch=false
+          npm test -- --coverage --watchAll=false
 
       - uses: actions/upload-artifact@v4
         with:
