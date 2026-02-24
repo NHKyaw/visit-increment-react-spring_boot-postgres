@@ -10,24 +10,24 @@ jobs:
   test-app:
     uses: ./.github/workflows/test.yaml
 
-  # 1. BUILD PHASE
-  build-java:
-    needs: [test-app]
-    uses: ./.github/workflows/build.yaml
-    with:
-      stack: 'java'
-    secrets: inherit
+  # # 1. BUILD PHASE
+  # build-java:
+  #   needs: [test-app]
+  #   uses: ./.github/workflows/build.yaml
+  #   with:
+  #     stack: 'java'
+  #   secrets: inherit
 
-  build-react:
-    needs: [test-app]
-    uses: ./.github/workflows/build.yaml
-    with:
-      stack: 'react'
-    secrets: inherit
+  # build-react:
+  #   needs: [test-app]
+  #   uses: ./.github/workflows/build.yaml
+  #   with:
+  #     stack: 'react'
+  #   secrets: inherit
 
 
-  # 3. DEPLOY PHASE (Runs only if Tests succeed)
-  deploy-app:
-    needs: [build-java, build-react]
-    uses: ./.github/workflows/deploy.yaml
-    secrets: inherit 
+  # # 3. DEPLOY PHASE (Runs only if Tests succeed)
+  # deploy-app:
+  #   needs: [build-java, build-react]
+  #   uses: ./.github/workflows/deploy.yaml
+  #   secrets: inherit 
