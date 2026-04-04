@@ -15,6 +15,9 @@ test:
           POSTGRES_DB: my_database
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: "12345678"
+          SPRING_DATASOURCE_URL: "jdbc:postgresql://postgres:5432/my_database"
+          SPRING_DATASOURCE_USERNAME: postgres
+          SPRING_DATASOURCE_PASSWORD: "12345678"
   script:
     - echo "Running backend tests..."
     - cd backend
