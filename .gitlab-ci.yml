@@ -1,27 +1,22 @@
 stages:
-  - test
   - build
-  - deploy
 
-test:
-  stage: test
-  image: eclipse-temurin:21-jdk
+
+default:
+  image: docker:24.0.5-cli
   services:
-    - name: postgres:15
-      alias: postgres
-      command: ["postgres", "-c", "listen_addresses='*'"]
-      variables:
-          # Service configuration (GitLab passes these to the Postgres container)
-          POSTGRES_DB: my_database
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: "12345678"
-          SPRING_DATASOURCE_URL: "jdbc:postgresql://postgres:5432/my_database"
-          SPRING_DATASOURCE_USERNAME: postgres
-          SPRING_DATASOURCE_PASSWORD: "12345678"
+    - docker:24.0.5-dind
+  before_script:
+    - docker info
+
+
+build:
+  stage: build
+  tags:
+    - DinD
   script:
-    - echo "Running backend tests..."
-    - cd backend
-    - ./mvnw test
-    - ls
+    - hostname
     - pwd
+    - whoami
+    - cat /etc/os-release
 
