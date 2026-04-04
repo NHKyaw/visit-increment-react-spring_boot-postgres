@@ -19,4 +19,6 @@ build:
     - pwd
     - whoami
     - cat /etc/os-release
+    - apk add java21-openjdk
+    - java -version
 
