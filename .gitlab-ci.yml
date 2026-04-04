@@ -14,11 +14,6 @@ test:
         POSTGRES_DB: my_database
         POSTGRES_USER: postgres
         POSTGRES_PASSWORD: 12345678
-      health_check:
-        test: ["CMD-SHELL", "pg_isready -U postgres -d my_database -h localhost"]
-        interval: 10s
-        timeout: 5s
-        retries: 5
   script:
     - echo "Running backend tests..."
     - cd backend
