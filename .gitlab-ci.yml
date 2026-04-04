@@ -10,10 +10,11 @@ test:
     - name: postgres:15
       alias: postgres
       command: ["postgres", "-c", "listen_addresses='*'"]
-      environment:
-        POSTGRES_DB: my_database
-        POSTGRES_USER: postgres
-        POSTGRES_PASSWORD: 12345678
+      variables:
+          # Service configuration (GitLab passes these to the Postgres container)
+          POSTGRES_DB: my_database
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: "12345678"
   script:
     - echo "Running backend tests..."
     - cd backend
