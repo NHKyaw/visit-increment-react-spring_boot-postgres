@@ -5,7 +5,7 @@ stages:
 
 test:
   stage: test
-  image: openjdk:11
+  image: eclipse-temurin:21-jdk
   script:
     - cd backend
     - ./mvnw test
