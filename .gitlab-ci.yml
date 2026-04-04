@@ -22,4 +22,6 @@ test:
     - echo "Running backend tests..."
     - cd backend
     - ./mvnw test
+    - ls
+    - pwd
 
