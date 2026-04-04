@@ -14,8 +14,6 @@ test:
         POSTGRES_DB: my_database
         POSTGRES_USER: postgres
         POSTGRES_PASSWORD: 12345678
-      ports:
-        - 5432:5432
       health_check:
         test: ["CMD-SHELL", "pg_isready -U postgres -d my_database -h localhost"]
         interval: 10s
