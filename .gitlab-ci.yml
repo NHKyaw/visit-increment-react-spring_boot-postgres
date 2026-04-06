@@ -1,5 +1,5 @@
 stages:
-  - build
+  - test
 
 
 default:
@@ -10,8 +10,8 @@ default:
     - docker info
 
 
-build:
-  stage: build
+test_build:
+  stage: test
   tags:
     - DinD
   script:
@@ -21,6 +21,17 @@ build:
     - node -v
     - ls -al
     - cd frontend && ls -al | grep package.json
-    - cd frontend && ls -al | grep node_modules
+    - ls -al | grep node_modules
     - npm install && ls -al | grep node_modules
+    - npm run build
+    - ls -al | grep dist
+    - npm run test
 
+test_unit:
+  stage: test
+  tags:
+    - DinD
+  script:
+    - pwd 
+    - ls -al
+    - whoami
