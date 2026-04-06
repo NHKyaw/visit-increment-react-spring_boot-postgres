@@ -17,4 +17,6 @@ build:
   script:
     - apk update
     - apk add nodejs npm
+    - npm -v
+    - node -v
 
