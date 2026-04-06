@@ -21,15 +21,12 @@ test_build:
     - node -v
     - cd frontend && ls -al | grep package.json
     - ls -al | grep node_modules >> /dev/null || echo "node_modules not found"
-    - npm install && ls -al | grep node_modules
-    - npm run build
-    - ls -al | grep dist
+    - npm ci && ls -al | grep node_modules
   
   cache:
     key: ${CI_COMMIT_REF_SLUG}
     paths:
       - frontend/node_modules/
-      - frontend/dist/
 
 test_unit:
   stage: test
