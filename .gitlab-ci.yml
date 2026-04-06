@@ -21,7 +21,7 @@ test_build:
     - node -v
     - ls -al
     - cd frontend && ls -al | grep package.json
-    - ls -al | grep node_modules
+    - ls -al | grep node_modules >> /dev/null || echo "node_modules not found"
     - npm install && ls -al | grep node_modules
     - npm run build
     - ls -al | grep dist
