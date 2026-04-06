@@ -19,19 +19,29 @@ test_build:
     - apk add nodejs npm
     - npm -v
     - node -v
-    - ls -al
     - cd frontend && ls -al | grep package.json
     - ls -al | grep node_modules >> /dev/null || echo "node_modules not found"
     - npm install && ls -al | grep node_modules
     - npm run build
     - ls -al | grep dist
-    - npm run test
+  
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - frontend/node_modules/
+      - frontend/dist/
 
 test_unit:
   stage: test
+  needs: [test_build]
   tags:
     - DinD
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - frontend/node_modules/
+      - frontend/dist/
   script:
     - pwd 
-    - ls -al
-    - whoami
+    - cd frontend && ls -al
+
