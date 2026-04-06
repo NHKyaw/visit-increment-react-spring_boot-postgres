@@ -15,10 +15,8 @@ build:
   tags:
     - DinD
   script:
-    - hostname
-    - pwd
-    - whoami
-    - cat /etc/os-release
-    - apk add openjdk21
-    - java -version
+    - apk add node
+    - node --version
+    - apk add npm
+    - npm --version
 
