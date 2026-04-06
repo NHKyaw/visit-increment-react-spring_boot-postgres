@@ -15,8 +15,5 @@ build:
   tags:
     - DinD
   script:
-    - apk add node
-    - node --version
-    - apk add npm
-    - npm --version
+    - uname -a
 
