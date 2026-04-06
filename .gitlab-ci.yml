@@ -19,6 +19,7 @@ build:
     - apk add nodejs npm
     - npm -v
     - node -v
+    - ls -al
     - ls -al | grep package.json
     - cd frontend && ls -al | grep node_modules
     - npm install && ls -al | grep node_modules
