@@ -26,7 +26,6 @@ default:
 
 ##Cache setup##
 .cache_pull: &cache_pull
-  cache:
     key: ${CI_COMMIT_REF_SLUG}
     paths:
       - .npm/
@@ -40,7 +39,7 @@ test_build:
   script:
     - *setup_node
     - ls -al | grep node_modules >> /dev/null || echo "node_modules not found"
-    - npm ci && ls -al | grep node_modules
+    - *install_deps
   
   cache:
     key: ${CI_COMMIT_REF_SLUG}
