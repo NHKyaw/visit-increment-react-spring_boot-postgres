@@ -87,10 +87,7 @@ default:
 
 .build_backend: &build_backend
   - apk update
-  - cat /etc/os-release
-  - apk search openjdk | grep 21
-  - apk search openjdk | grep -E '^openjdk[0-9]+-[0-9]' | sort
-  - apk add maven openjdk21
+  - apk add maven openjdk17
   - cd backend && ls -al | grep pom.xml
 
 backend_build:
