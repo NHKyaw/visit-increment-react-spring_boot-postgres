@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent, act } from '@testing-library/react';
+import { render, screen, fireEvent, act, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import App from './App';
 
@@ -26,8 +26,6 @@ describe('Initial Render', () => {
 
     render(<App />);
 
-    // Loading shows before fetch resolves on mount
-    // Title should always be present
     expect(screen.getByText('CI/CD Test App:UAT:v1')).toBeInTheDocument();
   });
 
@@ -53,7 +51,7 @@ describe('Fetching Visit Count', () => {
 
     render(<App />);
 
-    expect(screen.getByText('42')).toBeInTheDocument();
+    expect(await screen.findByText('42')).toBeInTheDocument();
   });
 
   test('displays count from raw number API response', async () => {
@@ -64,7 +62,7 @@ describe('Fetching Visit Count', () => {
 
     render(<App />);
 
-    expect(screen.getByText('7')).toBeInTheDocument();
+    expect(await screen.findByText('7')).toBeInTheDocument();
   });
 
   test('hides Loading... after fetch completes', async () => {
@@ -75,7 +73,9 @@ describe('Fetching Visit Count', () => {
 
     render(<App />);
 
-    expect(screen.queryByText('Loading...')).not.toBeInTheDocument();
+    await waitFor(() =>
+      expect(screen.queryByText('Loading...')).not.toBeInTheDocument()
+    );
   });
 });
 
@@ -86,7 +86,9 @@ describe('Error Handling', () => {
 
     render(<App />);
 
-    expect(screen.queryByText('Loading...')).not.toBeInTheDocument();
+    await waitFor(() =>
+      expect(screen.queryByText('Loading...')).not.toBeInTheDocument()
+    );
   });
 
   test('stops loading if response is not ok', async () => {
@@ -94,7 +96,9 @@ describe('Error Handling', () => {
 
     render(<App />);
 
-    expect(screen.queryByText('Loading...')).not.toBeInTheDocument();
+    await waitFor(() =>
+      expect(screen.queryByText('Loading...')).not.toBeInTheDocument()
+    );
   });
 });
 
@@ -108,7 +112,7 @@ describe('"Log New Visit" Button', () => {
 
     render(<App />);
 
-    expect(screen.getByText('Log New Visit')).toBeInTheDocument();
+    expect(await screen.findByText('Log New Visit')).toBeInTheDocument();
   });
 
   test('calls POST then refreshes count after 200ms delay', async () => {
@@ -127,9 +131,10 @@ describe('"Log New Visit" Button', () => {
 
     render(<App />);
 
-    expect(screen.getByText('0')).toBeInTheDocument();
+    // Wait for initial count to load
+    expect(await screen.findByText('0')).toBeInTheDocument();
 
-    // Click button and advance the 200ms timer together inside act()
+    // Click button and advance the 200ms timer
     fireEvent.click(screen.getByText('Log New Visit'));
     await act(async () => {
       jest.advanceTimersByTime(200);
