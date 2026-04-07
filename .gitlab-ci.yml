@@ -26,7 +26,7 @@ test_build:
   cache:
     key: ${CI_COMMIT_REF_SLUG}
     paths:
-      - frontend/node_modules/
+      - ~/.npm
 
 ##Container2
 test_unit:
@@ -37,8 +37,7 @@ test_unit:
   cache:
     key: ${CI_COMMIT_REF_SLUG}
     paths:
-      - frontend/node_modules/
-      - frontend/dist/
+      - ~/.npm
   script:
     - pwd 
     - cd frontend && ls -al
