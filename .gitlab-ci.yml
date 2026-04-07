@@ -1,5 +1,6 @@
 stages:
-  - test
+  - fetest
+  - betest
 
 
 default:
@@ -31,9 +32,9 @@ default:
       - .npm/
     policy: pull
 
-##Container1
-test_build:
-  stage: test
+
+frontend_build:
+  stage: fetest
   tags:
     - DinD
   script:
@@ -45,11 +46,11 @@ test_build:
     key: ${CI_COMMIT_REF_SLUG}
     paths:
       - .npm/
-    policy: push
+    policy: pull-push
 
-##Container2
+
 test_unit:
-  stage: test
+  stage: fetest
   needs: [test_build]
   tags:
     - DinD
@@ -62,7 +63,7 @@ test_unit:
 
 ##Container3
 linting_test:
-  stage: test
+  stage: fetest
   needs: [test_build]
   tags:
     - DinD
@@ -71,3 +72,54 @@ linting_test:
     - *setup_node
     - *install_deps
     - npm run lint && echo "✅ Linting passed with no errors!"
+
+
+
+
+
+######Reusable code for backend tests######
+
+.cache_pull_backend: &cache_pull_backend
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - .mvn/
+    policy: pull
+
+.build_backend: &build_backend
+  - apk update
+  - apk add maven openjdk21
+  - cd backend && ls -al | grep pom.xml
+
+backend_build:
+  stage: betest
+  tags:
+    - DinD
+  script:
+    - *build_backend
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - .mvn/
+    policy: pull-push
+
+backend_unit_test:
+  stage: betest
+  needs:
+    - backend_build
+  tags:
+    - DinD
+  cache: *cache_pull_backend
+  script:
+    - *build_backend
+    - cd backend && ./mvnw test
+
+backend_linting_test:
+  stage: betest
+  needs:
+    - backend_build
+  tags:
+    - DinD
+  cache: *cache_pull_backend
+  script:
+    - *build_backend
+    - cd backend && ./mvnw checkstyle:check && echo "✅ Checkstyle passed with no errors!"
