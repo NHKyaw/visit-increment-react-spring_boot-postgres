@@ -3,12 +3,12 @@ stages:
   - betest
 
 
-# default:
-#   image: docker:24.0.5-cli
-#   services:
-#     - docker:24.0.5-dind
-#   before_script:
-#     - docker info
+default:
+  image: docker:24.0.5-cli
+  services:
+    - docker:24.0.5-dind
+  before_script:
+    - docker info
 
 
 # ##########Reusable code for all containers##########
@@ -87,7 +87,10 @@ stages:
 
 .build_backend: &build_backend
   - apk update
+  - cat /etc/os-release
+  - cat /etc/apk/respositories
   - apk search openjdk | grep 21
+  - apk search openjdk | grep -E '^openjdk[0-9]+-[0-9]' | sort
   - apk add maven openjdk21
   - cd backend && ls -al | grep pom.xml
 
