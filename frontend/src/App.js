@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 function App() {
   const [count, setCount] = useState(0);
@@ -9,17 +9,14 @@ function App() {
   const VM_IP = "3.1.108.202"; 
   const BASE_URL = `http://${VM_IP}:8080/api/visit`;
 
-  const refreshCount = async () => {
+  const refreshCount = useCallback(async () => {
     setLoading(true);
     try {
-      // Step 4: Use the full absolute path /api/visit/count
       const res = await fetch(`${BASE_URL}/count`);
       if (!res.ok) throw new Error("Check if Backend is running in VM");
       
       const data = await res.json();
       
-      // CRITICAL: Access .count because Java returns a Map
-      // Fallback logic handles both object and raw number returns
       if (data && typeof data.count !== 'undefined') {
         setCount(data.count);
       } else {
@@ -31,7 +28,7 @@ function App() {
       console.error("Connection Error:", err);
       setLoading(false);
     }
-  };
+  }, [BASE_URL]);
 
   const handleVisit = async () => {
     try {
@@ -47,7 +44,7 @@ function App() {
 
   useEffect(() => { 
     refreshCount(); 
-  }, []);
+  }, [refreshCount]);
 
   return (
     <div style={{ textAlign: 'center', padding: '50px', fontFamily: 'Arial' }}>

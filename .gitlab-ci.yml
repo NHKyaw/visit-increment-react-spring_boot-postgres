@@ -60,7 +60,7 @@ test_unit:
     - npm run test:ci
 
 
-
+##Container3
 linting_test:
   stage: test
   needs: [test_build]
@@ -70,4 +70,4 @@ linting_test:
   script:
     - *setup_node
     - *install_deps
-    - npm run lint
+    - npm run lint && echo "✅ Linting passed with no errors!"

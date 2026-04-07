@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import App from './App';
 
@@ -24,9 +24,7 @@ describe('Initial Render', () => {
       json: async () => ({ count: 5 }),
     });
 
-    await act(async () => {
-      render(<App />);
-    });
+    render(<App />);
 
     // Loading shows before fetch resolves on mount
     // Title should always be present
@@ -39,9 +37,7 @@ describe('Initial Render', () => {
       json: async () => ({ count: 0 }),
     });
 
-    await act(async () => {
-      render(<App />);
-    });
+    render(<App />);
 
     expect(screen.getByText('CI/CD Test App:UAT:v1')).toBeInTheDocument();
   });
@@ -55,9 +51,7 @@ describe('Fetching Visit Count', () => {
       json: async () => ({ count: 42 }),
     });
 
-    await act(async () => {
-      render(<App />);
-    });
+    render(<App />);
 
     expect(screen.getByText('42')).toBeInTheDocument();
   });
@@ -68,9 +62,7 @@ describe('Fetching Visit Count', () => {
       json: async () => 7,
     });
 
-    await act(async () => {
-      render(<App />);
-    });
+    render(<App />);
 
     expect(screen.getByText('7')).toBeInTheDocument();
   });
@@ -81,9 +73,7 @@ describe('Fetching Visit Count', () => {
       json: async () => ({ count: 3 }),
     });
 
-    await act(async () => {
-      render(<App />);
-    });
+    render(<App />);
 
     expect(screen.queryByText('Loading...')).not.toBeInTheDocument();
   });
@@ -94,9 +84,7 @@ describe('Error Handling', () => {
   test('stops loading if fetch throws a network error', async () => {
     fetch.mockRejectedValueOnce(new Error('Network Error'));
 
-    await act(async () => {
-      render(<App />);
-    });
+    render(<App />);
 
     expect(screen.queryByText('Loading...')).not.toBeInTheDocument();
   });
@@ -104,9 +92,7 @@ describe('Error Handling', () => {
   test('stops loading if response is not ok', async () => {
     fetch.mockResolvedValueOnce({ ok: false });
 
-    await act(async () => {
-      render(<App />);
-    });
+    render(<App />);
 
     expect(screen.queryByText('Loading...')).not.toBeInTheDocument();
   });
@@ -120,9 +106,7 @@ describe('"Log New Visit" Button', () => {
       json: async () => ({ count: 0 }),
     });
 
-    await act(async () => {
-      render(<App />);
-    });
+    render(<App />);
 
     expect(screen.getByText('Log New Visit')).toBeInTheDocument();
   });
@@ -141,19 +125,17 @@ describe('"Log New Visit" Button', () => {
       json: async () => ({ count: 1 }),
     });
 
-    await act(async () => {
-      render(<App />);
-    });
+    render(<App />);
 
     expect(screen.getByText('0')).toBeInTheDocument();
 
     // Click button and advance the 200ms timer together inside act()
+    fireEvent.click(screen.getByText('Log New Visit'));
     await act(async () => {
-      fireEvent.click(screen.getByText('Log New Visit'));
       jest.advanceTimersByTime(200);
     });
 
-    await waitFor(() => expect(screen.getByText('1')).toBeInTheDocument());
+    expect(await screen.findByText('1')).toBeInTheDocument();
 
     expect(fetch).toHaveBeenCalledWith(
       expect.stringContaining('/api/visit'),
