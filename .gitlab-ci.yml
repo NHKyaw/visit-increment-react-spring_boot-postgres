@@ -51,7 +51,7 @@ frontend_build:
 
 test_unit:
   stage: fetest
-  needs: [test_build]
+  needs: [frontend_build]
   tags:
     - DinD
   cache: *cache_pull
@@ -64,7 +64,7 @@ test_unit:
 ##Container3
 linting_test:
   stage: fetest
-  needs: [test_build]
+  needs: [frontend_build]
   tags:
     - DinD
   cache: *cache_pull
@@ -110,7 +110,7 @@ backend_unit_test:
     - DinD
   cache: *cache_pull_backend
   script:
-    - *build_backend
+    - *build_backend  
     - cd backend && ./mvnw test
 
 backend_linting_test:
