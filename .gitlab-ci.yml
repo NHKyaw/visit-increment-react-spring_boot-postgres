@@ -27,6 +27,7 @@ test_build:
     key: ${CI_COMMIT_REF_SLUG}
     paths:
       - ~/.npm
+    policy: push
 
 ##Container2
 test_unit:
@@ -38,8 +39,10 @@ test_unit:
     key: ${CI_COMMIT_REF_SLUG}
     paths:
       - ~/.npm
+    policy: pull
   script:
     - pwd 
     - cd frontend && ls -al
+    - npm ci && ls -al | grep node_modules
     - npm run test:ci
 
