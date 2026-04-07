@@ -41,8 +41,11 @@ test_unit:
       - ~/.npm
     policy: pull
   script:
-    - pwd 
+    - apk update
+    - apk add nodejs npm
+    - npm -v
+    - node -v
     - cd frontend && ls -al
-    - npm ci && ls -al | grep node_modules
+    - npm ci --cache ../.npm && ls -al | grep node_modules
     - npm run test:ci
 
