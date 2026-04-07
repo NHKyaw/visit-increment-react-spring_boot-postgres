@@ -41,5 +41,5 @@ test_unit:
   script:
     - pwd 
     - cd frontend && ls -al
-    - whoami
+    - npm run test:ci
 
