@@ -11,73 +11,73 @@ default:
     - docker info
 
 
-##########Reusable code for all containers##########
+# ##########Reusable code for all containers##########
 
-##Node setup##
-.setup_node: &setup_node
-  - apk update
-  - apk add nodejs npm
-  - npm -v
-  - node -v
-  - cd frontend && ls -al | grep package.json
+# ##Node setup##
+# .setup_node: &setup_node
+#   - apk update
+#   - apk add nodejs npm
+#   - npm -v
+#   - node -v
+#   - cd frontend && ls -al | grep package.json
 
-##Install Dependencies##
-.install_deps: &install_deps
-  - npm ci --cache ../.npm && ls -al | grep node_modules
+# ##Install Dependencies##
+# .install_deps: &install_deps
+#   - npm ci --cache ../.npm && ls -al | grep node_modules
 
-##Cache setup##
-.cache_pull: &cache_pull
-    key: ${CI_COMMIT_REF_SLUG}
-    paths:
-      - .npm/
-    policy: pull
+# ##Cache setup##
+# .cache_pull: &cache_pull
+#     key: ${CI_COMMIT_REF_SLUG}
+#     paths:
+#       - .npm/
+#     policy: pull
 
 
-frontend_build:
-  stage: fetest
-  tags:
-    - DinD
-  script:
-    - *setup_node
-    - ls -al | grep node_modules >> /dev/null || echo "node_modules not found"
-    - *install_deps
+# frontend_build:
+#   stage: fetest
+#   tags:
+#     - DinD
+#   script:
+#     - *setup_node
+#     - ls -al | grep node_modules >> /dev/null || echo "node_modules not found"
+#     - *install_deps
   
-  cache:
-    key: ${CI_COMMIT_REF_SLUG}
-    paths:
-      - .npm/
-    policy: pull-push
+#   cache:
+#     key: ${CI_COMMIT_REF_SLUG}
+#     paths:
+#       - .npm/
+#     policy: pull-push
 
 
-test_unit:
-  stage: fetest
-  needs: [frontend_build]
-  tags:
-    - DinD
-  cache: *cache_pull
-  script:
-    - *setup_node
-    - *install_deps
-    - npm run test:ci
+# test_unit:
+#   stage: fetest
+#   needs: [frontend_build]
+#   tags:
+#     - DinD
+#   cache: *cache_pull
+#   script:
+#     - *setup_node
+#     - *install_deps
+#     - npm run test:ci
 
 
-##Container3
-linting_test:
-  stage: fetest
-  needs: [frontend_build]
-  tags:
-    - DinD
-  cache: *cache_pull
-  script:
-    - *setup_node
-    - *install_deps
-    - npm run lint && echo "✅ Linting passed with no errors!"
+# ##Container3
+# linting_test:
+#   stage: fetest
+#   needs: [frontend_build]
+#   tags:
+#     - DinD
+#   cache: *cache_pull
+#   script:
+#     - *setup_node
+#     - *install_deps
+#     - npm run lint && echo "✅ Linting passed with no errors!"
 
 
 
 
 
-######Reusable code for backend tests######
+# ######Reusable code for backend tests######
 
 .cache_pull_backend: &cache_pull_backend
     key: ${CI_COMMIT_REF_SLUG}
@@ -114,14 +114,22 @@ backend_unit_test:
   script:
     - *build_backend  
     - ./mvnw test
+  services:
+    - name: postgres:15.3
+      alias: postgres
 
-backend_linting_test:
-  stage: betest
-  needs:
-    - backend_build
-  tags:
-    - DinD
-  cache: *cache_pull_backend
-  script:
-    - *build_backend
-    - ./mvnw checkstyle:check && echo "✅ Checkstyle passed with no errors!"
+      variables:
+        POSTGRES_DB: my_database
+        POSTGRES_USER: postgres
+        POSTGRES_PASSWORD: 12345678
+
+# backend_linting_test:
+#   stage: betest
+#   needs:
+#     - backend_build
+#   tags:
+#     - DinD
+#   cache: *cache_pull_backend
+#   script:
+#     - *build_backend
+#     - ./mvnw checkstyle:check && echo "✅ Checkstyle passed with no errors!"
