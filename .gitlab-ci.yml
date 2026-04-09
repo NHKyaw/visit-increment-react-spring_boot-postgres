@@ -1,77 +1,68 @@
 stages:
   - fetest
   - betest
+##########Reusable code for all containers##########
+
+##Node setup##
+.setup_node: &setup_node
+  - npm -v
+  - node -v
+  - cd frontend && ls -al | grep package.json
+
+##Install Dependencies##
+.install_deps: &install_deps
+  - npm ci --cache ../.npm && ls -al | grep node_modules
+
+##Cache setup##
+.cache_pull: &cache_pull
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - .npm/
+    policy: pull
 
 
-default:
-  image: docker:24.0.5-cli
-  services:
-    - docker:24.0.5-dind
-  before_script:
-    - docker info
-
-
-# ##########Reusable code for all containers##########
-
-# ##Node setup##
-# .setup_node: &setup_node
-#   - apk update
-#   - apk add nodejs npm
-#   - npm -v
-#   - node -v
-#   - cd frontend && ls -al | grep package.json
-
-# ##Install Dependencies##
-# .install_deps: &install_deps
-#   - npm ci --cache ../.npm && ls -al | grep node_modules
-
-# ##Cache setup##
-# .cache_pull: &cache_pull
-#     key: ${CI_COMMIT_REF_SLUG}
-#     paths:
-#       - .npm/
-#     policy: pull
-
-
-# frontend_build:
-#   stage: fetest
-#   tags:
-#     - DinD
-#   script:
-#     - *setup_node
-#     - ls -al | grep node_modules >> /dev/null || echo "node_modules not found"
-#     - *install_deps
+frontend_build:
+  stage: fetest
+  image: node:20-alpine
+  tags:
+    - DinD
+  script:
+    - *setup_node
+    - ls -al | grep node_modules >> /dev/null || echo "node_modules not found"
+    - *install_deps
   
-#   cache:
-#     key: ${CI_COMMIT_REF_SLUG}
-#     paths:
-#       - .npm/
-#     policy: pull-push
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - .npm/
+    policy: pull-push
 
 
-# test_unit:
-#   stage: fetest
-#   needs: [frontend_build]
-#   tags:
-#     - DinD
-#   cache: *cache_pull
-#   script:
-#     - *setup_node
-#     - *install_deps
-#     - npm run test:ci
+test_unit:
+  stage: fetest
+  image: node:20-alpine
+  needs: [frontend_build]
+  tags:
+    - DinD
+  cache: *cache_pull
+  script:
+    - *setup_node
+    - *install_deps
+    - npm run test:ci
 
 
-# ##Container3
-# linting_test:
-#   stage: fetest
-#   needs: [frontend_build]
-#   tags:
-#     - DinD
-#   cache: *cache_pull
-#   script:
-#     - *setup_node
-#     - *install_deps
-#     - npm run lint && echo "✅ Linting passed with no errors!"
+##Container3
+linting_test:
+  stage: fetest
+  image: node:20-alpine
+  needs: [frontend_build]
+  tags:
+    - DinD
+  cache: *cache_pull
+  script:
+    - *setup_node
+    - *install_deps
+    - npm run lint && echo "✅ Linting passed with no errors!"
 
 
 
@@ -110,7 +101,6 @@ backend_unit_test:
     - backend_build
   tags:
     - DinD
-  before_script: []
   image: maven:3.9-eclipse-temurin-17-alpine
   services:
     - name: postgres:15.3
@@ -127,13 +117,14 @@ backend_unit_test:
     - cd backend
     - ./mvnw test -Dtest="VisitorControllerTest" -DfailIfNoTests=false
 
-# backend_linting_test:
-#   stage: betest
-#   needs:
-#     - backend_build
-#   tags:
-#     - DinD
-#   cache: *cache_pull_backend
-#   script:
-#     - *build_backend
-#     - ./mvnw checkstyle:check && echo "✅ Checkstyle passed with no errors!"
+backend_linting_test:
+  stage: betest
+  needs:
+    - backend_build
+  tags:
+    - DinD
+  image: maven:3.9-eclipse-temurin-17-alpine
+  cache: *cache_pull_backend
+  script:
+    - *build_backend
+    - ./mvnw checkstyle:check && echo "✅ Checkstyle passed with no errors!"
