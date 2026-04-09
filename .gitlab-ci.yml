@@ -77,8 +77,6 @@ linting_test:
     policy: pull
 
 .build_backend: &build_backend
-  - apk update
-  - apk add maven openjdk17
   - pwd
   - ls -al
   - cd backend && ls -al | grep pom.xml
