@@ -110,6 +110,7 @@ backend_unit_test:
     - backend_build
   tags:
     - DinD
+  before_script: []
   image: maven:3.9-eclipse-temurin-17-alpine
   services:
     - name: postgres:15.3
