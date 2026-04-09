@@ -126,6 +126,8 @@ stages:
   image: docker:24.0.5-cli
   services:
     - docker:dind
+  tags:
+    - DinD
 
 .docker_login: &docker_login
   - docker login -u nhkyaw -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
