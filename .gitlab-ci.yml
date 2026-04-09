@@ -130,7 +130,7 @@ stages:
     - DinD
 
 .docker_login: &docker_login
-  - docker login -u nhkyaw -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
+  - docker login -u $CI_REGISTRY_USER -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
 
 fe_build:
   stage: build
