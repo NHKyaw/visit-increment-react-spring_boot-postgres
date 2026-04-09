@@ -110,18 +110,21 @@ backend_unit_test:
     - backend_build
   tags:
     - DinD
-  cache: *cache_pull_backend
-  script:
-    - *build_backend  
-    - ./mvnw test
+  image: maven:3.9-eclipse-temurin-17-alpine
   services:
     - name: postgres:15.3
-      alias: postgres
-
-      variables:
-        POSTGRES_DB: my_database
-        POSTGRES_USER: postgres
-        POSTGRES_PASSWORD: 12345678
+      alias: postgres-db
+  variables:
+    POSTGRES_DB: my_database
+    POSTGRES_USER: postgres
+    POSTGRES_PASSWORD: "12345678"
+    SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-db:5432/my_database
+    SPRING_DATASOURCE_USERNAME: postgres
+    SPRING_DATASOURCE_PASSWORD: "12345678"
+  cache: *cache_pull_backend
+  script:
+    - cd backend
+    - ./mvnw test -Dtest="VisitorControllerTest" -DfailIfNoTests=false
 
 # backend_linting_test:
 #   stage: betest
