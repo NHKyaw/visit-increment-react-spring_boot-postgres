@@ -25,9 +25,10 @@ public class VisitorControllerTest {
 
     @Test
     public void testAddVisit_returnsConfirmationMessage() {
-        when(repo.save(any(Visitor.class))).thenReturn(new Visitor("2024-01-01"));
+        when(repo.save(any(Visitor.class)))
+                .thenReturn(new Visitor("2024-01-01"));
 
-        String result = controller.addVisit();
+        final String result = controller.addVisit();
 
         assertEquals("Visit Recorded!", result);
         verify(repo, times(1)).save(any(Visitor.class));
@@ -37,7 +38,7 @@ public class VisitorControllerTest {
     public void testGetCount_returnsCountFromRepo() {
         when(repo.count()).thenReturn(5L);
 
-        Map<String, Long> result = controller.getCount();
+        final Map<String, Long> result = controller.getCount();
 
         assertEquals(5L, result.get("count"));
     }
@@ -46,7 +47,7 @@ public class VisitorControllerTest {
     public void testGetCount_returnsZeroWhenEmpty() {
         when(repo.count()).thenReturn(0L);
 
-        Map<String, Long> result = controller.getCount();
+        final Map<String, Long> result = controller.getCount();
 
         assertEquals(0L, result.get("count"));
     }
