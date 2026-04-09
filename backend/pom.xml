@@ -92,23 +92,29 @@
 			</plugin>
 
 			<plugin>
-    <groupId>org.apache.maven.plugins</groupId>
-    <artifactId>maven-checkstyle-plugin</artifactId>
-    <version>3.3.1</version>
-    <configuration>
-        <configLocation>checkstyle.xml</configLocation>
-        <failsOnError>true</failsOnError>
-        <consoleOutput>true</consoleOutput>
-    </configuration>
-    <executions>
-        <execution>
-            <id>validate</id>
-            <phase>validate</phase>
-            <goals>
-                <goal>check</goal>
-            </goals>
-        </execution>
-    </executions>
+  <groupId>org.apache.maven.plugins</groupId>
+  <artifactId>maven-checkstyle-plugin</artifactId>
+  <version>3.3.1</version>
+  <dependencies>
+    <!-- Force checkstyle version (already explicit, but good to keep) -->
+    <dependency>
+      <groupId>com.puppycrawl.tools</groupId>
+      <artifactId>checkstyle</artifactId>
+      <version>9.3</version>
+    </dependency>
+    <!-- Exclude the conflicting google-collections pulled in by xbean-reflect -->
+    <dependency>
+      <groupId>org.apache.xbean</groupId>
+      <artifactId>xbean-reflect</artifactId>
+      <version>3.7</version>
+      <exclusions>
+        <exclusion>
+          <groupId>com.google.collections</groupId>
+          <artifactId>google-collections</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+  </dependencies>
 </plugin>
 		</plugins>
 	</build>
