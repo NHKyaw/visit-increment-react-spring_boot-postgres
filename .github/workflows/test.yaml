@@ -53,7 +53,8 @@ jobs:
         env:
           SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/my_database
           SPRING_DATASOURCE_USERNAME: postgres
-          SPRING_DATASOURCE_PASSWORD: 12345678
+          SPRING_DATASOURCE_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          APP_DATABASE_NAME: my_database
         run: ./mvnw test
       
         
