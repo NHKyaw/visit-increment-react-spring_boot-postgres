@@ -40,14 +40,23 @@ jobs:
           docker build -t $DOCKER_REPO:backend-${IMAGE_TAG} backend
           docker build -t $DOCKER_REPO:frontend-${IMAGE_TAG} frontend
           
-      - name: Run Trivy scan
+      - name: Run Trivy scan for backend image
+        if: ${{ inputs.stack == 'java' }}
         uses: aquasecurity/trivy-action@v0.20.0
         with:
-          scan-type: 'fs'
-          scan-ref: '.'
-          format: 'table'
-          exit-code: '1'
-          severity: 'CRITICAL,HIGH'
+            image-ref: $DOCKER_REPO:backend-${IMAGE_TAG}
+            format: 'table'
+            exit-code: '1'
+            severity: 'CRITICAL,HIGH'
+
+      - name: Run Trivy scan for frontend image
+        if: ${{ inputs.stack == 'react' }}
+        uses: aquasecurity/trivy-action@v0.20.0
+        with:
+            image-ref: $DOCKER_REPO:frontend-${IMAGE_TAG}
+            format: 'table'
+            exit-code: '1'
+            severity: 'CRITICAL,HIGH'
 
       - name: Push Images
         if: ${{ inputs.stack == 'react' }}
