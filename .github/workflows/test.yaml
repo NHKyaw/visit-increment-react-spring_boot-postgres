@@ -153,7 +153,20 @@ jobs:
           key: npm-${{ hashFiles('frontend/package-lock.json') }}
           restore-keys: |
             npm-
-      
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          
+      - name: Cache Maven dependencies
+        uses: actions/cache@v4
+        with:
+          path: ./backend/.mvn
+          key: maven-${{ hashFiles('backend/pom.xml') }}
+          restore-keys: |
+            maven-
+
       - name: Run SonarQube scan
         uses: SonarSource/sonarqube-scan-action@v7.1.0
         with:
