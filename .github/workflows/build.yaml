@@ -67,7 +67,6 @@ jobs:
         run: |
           
           docker push $DOCKER_REPO:frontend-${IMAGE_TAG}
-          docker push $DOCKER_REPO:backend-${IMAGE_TAG}
 
       - name: Push Backend Image
         if: ${{ inputs.stack == 'java' }}
