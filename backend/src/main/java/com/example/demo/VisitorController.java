@@ -8,7 +8,6 @@ import java.time.LocalDateTime;
 import java.util.Map;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:3000")
 public final class VisitorController {
 
     /** The visitor repository. */
