@@ -158,8 +158,8 @@ jobs:
         uses: SonarSource/sonarqube-scan-action@v7.1.0
         with:
           args: >
-            -Dsonar.projectKey=nhkyaw
-            -Dsonar.organization="Nyan Htet Kyaw"
+            -Dsonar.projectKey=visitincrementorgkey
+            -Dsonar.organization=visitincrement-proj
             -Dsonar.sources=./frontend/src
             -Dsonar.host.url=https://sonarcloud.io
         env:
