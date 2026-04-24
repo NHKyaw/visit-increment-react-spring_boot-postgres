@@ -159,7 +159,7 @@ jobs:
         with:
           args: >
             -Dsonar.projectKey=NHKyaw_visit-increment-app-github-action-aws-infra
-            -Dsonar.organization=visitincrement-org
+            -Dsonar.organization=visitincrementorgkey
             -Dsonar.sources=./frontend/src
             -Dsonar.host.url=https://sonarcloud.io
         env:
