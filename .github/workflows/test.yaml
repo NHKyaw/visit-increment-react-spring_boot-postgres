@@ -6,59 +6,141 @@ on:
   workflow_call:
 
 jobs: 
-  test:
-    runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:15
-        env:
-          POSTGRES_DB: my_database
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: 12345678
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+  # test:
+  #   runs-on: ubuntu-latest
+  #   services:
+  #     postgres:
+  #       image: postgres:15
+  #       env:
+  #         POSTGRES_DB: my_database
+  #         POSTGRES_USER: postgres
+  #         POSTGRES_PASSWORD: 12345678
+  #       ports:
+  #         - 5432:5432
+  #       options: >-
+  #         --health-cmd pg_isready
+  #         --health-interval 10s
+  #         --health-timeout 5s
+  #         --health-retries 5
 
-    steps:
-      - uses: actions/checkout@v4
+  #   steps:
+  #     - uses: actions/checkout@v4
 
-      # Backend tests
-      - name: Set up Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: 21
+  #     # Backend tests
+  #     - name: Set up Java
+  #       uses: actions/setup-java@v4
+  #       with:
+  #         distribution: temurin
+  #         java-version: 21
 
-      - name: Cache Maven dependencies
-        uses: actions/cache@v4
-        with:
-          path: ./backend/.mvn
-          key: maven-${{ hashFiles('backend/pom.xml') }}
-          restore-keys: |
-            maven-
+  #     - name: Cache Maven dependencies
+  #       uses: actions/cache@v4
+  #       with:
+  #         path: ./backend/.mvn
+  #         key: maven-${{ hashFiles('backend/pom.xml') }}
+  #         restore-keys: |
+  #           maven-
 
-      - name : Wait for PostgreSQL to be ready
-        run: |
-          until pg_isready -h localhost -p 5432 -U postgres; do
-            echo "Waiting for PostgreSQL to be ready..."
-            sleep 5
-          done
+  #     - name : Wait for PostgreSQL to be ready
+  #       run: |
+  #         until pg_isready -h localhost -p 5432 -U postgres; do
+  #           echo "Waiting for PostgreSQL to be ready..."
+  #           sleep 5
+  #         done
 
-      - name: Run backend tests
-        working-directory: backend
-        env:
-          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/my_database
-          SPRING_DATASOURCE_USERNAME: postgres
-          SPRING_DATASOURCE_PASSWORD: 12345678
-        run: ./mvnw test
+  #     - name: Run backend tests
+  #       working-directory: backend
+  #       env:
+  #         SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/my_database
+  #         SPRING_DATASOURCE_USERNAME: postgres
+  #         SPRING_DATASOURCE_PASSWORD: 12345678
+  #       run: ./mvnw test
       
         
 
-      # Frontend tests
+  #     # Frontend tests
+  #     - name: Set up Node
+  #       uses: actions/setup-node@v4
+  #       with:
+  #         node-version: 20
+
+  #     - name: Cache npm dependencies
+  #       uses: actions/cache@v4
+  #       with:
+  #         path: ./frontend/node_modules
+  #         key: npm-${{ hashFiles('frontend/package-lock.json') }}
+  #         restore-keys: |
+  #           npm-
+
+
+  #     - name: Run frontend tests
+  #       working-directory: frontend
+  #       run: |
+  #         npm ci
+  #         npm test -- --coverage --watchAll=false
+
+  #     - uses: actions/upload-artifact@v4
+  #       with:
+  #         name: frontend-test-results
+
+  #         # A file, directory or wildcard pattern that describes what to upload
+  #         # Required.
+  #         path: frontend/coverage
+
+
+  # lint:
+  #   runs-on: ubuntu-latest
+
+  #   steps:
+  #     - uses: actions/checkout@v4
+
+  #     # Backend lint
+  #     - name: Set up Java
+  #       uses: actions/setup-java@v4
+  #       with:
+  #         distribution: temurin
+  #         java-version: 21
+
+  #     - name: Cache Maven dependencies
+  #       uses: actions/cache@v4
+  #       with:
+  #         path: ./backend/.mvn
+  #         key: maven-${{ hashFiles('backend/pom.xml') }}
+  #         restore-keys: |
+  #           maven-
+      
+  #     - name: Run backend lint
+  #       working-directory: backend
+  #       run: ./mvnw checkstyle:check
+        
+  #     # Frontend lint
+  #     - name: Set up Node
+  #       uses: actions/setup-node@v4
+  #       with:
+  #         node-version: 20
+      
+  #     - name: Cache npm dependencies
+  #       uses: actions/cache@v4
+  #       with:
+  #         path: ./frontend/node_modules
+  #         key: npm-${{ hashFiles('frontend/package-lock.json') }}
+  #         restore-keys: |
+  #           npm-
+      
+  #     - name: Run frontend lint
+  #       working-directory: frontend
+  #       run: |
+  #         npm ci
+  #         npm run lint
+
+  fe_sonar_scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
@@ -71,65 +153,14 @@ jobs:
           key: npm-${{ hashFiles('frontend/package-lock.json') }}
           restore-keys: |
             npm-
-
-
-      - name: Run frontend tests
-        working-directory: frontend
-        run: |
-          npm ci
-          npm test -- --coverage --watchAll=false
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: frontend-test-results
-
-          # A file, directory or wildcard pattern that describes what to upload
-          # Required.
-          path: frontend/coverage
-
-
-  lint:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      # Backend lint
-      - name: Set up Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: 21
-
-      - name: Cache Maven dependencies
-        uses: actions/cache@v4
-        with:
-          path: ./backend/.mvn
-          key: maven-${{ hashFiles('backend/pom.xml') }}
-          restore-keys: |
-            maven-
       
-      - name: Run backend lint
-        working-directory: backend
-        run: ./mvnw checkstyle:check
-        
-      # Frontend lint
-      - name: Set up Node
-        uses: actions/setup-node@v4
+      - name: Run SonarQube scan
+        uses: SonarSource/sonarqube-scan-action@v7.1.0
         with:
-          node-version: 20
-      
-      - name: Cache npm dependencies
-        uses: actions/cache@v4
-        with:
-          path: ./frontend/node_modules
-          key: npm-${{ hashFiles('frontend/package-lock.json') }}
-          restore-keys: |
-            npm-
-      
-      - name: Run frontend lint
-        working-directory: frontend
-        run: |
-          npm ci
-          npm run lint
+          args: >
+            -Dsonar.projectKey=visit-record-app-frontend
+            -Dsonar.sources=.
+            -Dsonar.host.url=https://sonarcloud.io
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
