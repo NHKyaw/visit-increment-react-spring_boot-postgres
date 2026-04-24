@@ -64,7 +64,7 @@ jobs:
       - name: Run frontend tests
         working-directory: frontend
         run: |
-          npm install
+          npm ci
           npm test -- --coverage --watchAll=false
 
       - uses: actions/upload-artifact@v4
@@ -74,4 +74,50 @@ jobs:
           # A file, directory or wildcard pattern that describes what to upload
           # Required.
           path: frontend/coverage
+
+
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Backend lint
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Cache Maven dependencies
+        uses: actions/cache@v4
+        with:
+          path: ./backend/.mvn
+          key: maven-${{ hashFiles('backend/pom.xml') }}
+          restore-keys: |
+            maven-
+      
+      - name: Run backend lint
+        working-directory: backend
+        run: ./mvnw checkstyle:check
+        
+      # Frontend lint
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      
+      - name: Cache npm dependencies
+        uses: actions/cache@v4
+        with:
+          path: ./frontend/node_modules
+          key: npm-${{ hashFiles('frontend/package-lock.json') }}
+          restore-keys: |
+            npm-
+      
+      - name: Run frontend lint
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run lint
 

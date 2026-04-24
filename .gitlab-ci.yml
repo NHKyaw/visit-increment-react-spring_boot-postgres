@@ -2,122 +2,122 @@ stages:
   - fetest
   - betest
   - build
-# ##########Reusable code for all containers##########
+##########Reusable code for all containers##########
 
-# .node_job: &node_job
-#   stage: fetest
-#   image: node:20-alpine
-#   tags:
-#     - DinD
-
-
-# .maven_job: &maven_job
-#   stage: betest
-#   image: maven:3.9-eclipse-temurin-17-alpine
-#   tags:
-#     - DinD
-
-# ##Node setup##
-# .setup_node: &setup_node
-#   - npm -v
-#   - node -v
-#   - cd frontend && ls -al | grep package.json
-
-# ##Install Dependencies##
-# .install_deps: &install_deps
-#   - npm ci --cache ../.npm && ls -al | grep node_modules
-
-# ##Cache setup##
-# .cache_pull: &cache_pull
-#     key: ${CI_COMMIT_REF_SLUG}
-#     paths:
-#       - .npm/
-#     policy: pull
+.node_job: &node_job
+  stage: fetest
+  image: node:20-alpine
+  tags:
+    - DinD
 
 
-# frontend_build:
-#   <<: *node_job
-#   script:
-#     - *setup_node
-#     - ls -al | grep node_modules >> /dev/null || echo "node_modules not found"
-#     - *install_deps
-#   cache:
-#     key: ${CI_COMMIT_REF_SLUG}
-#     paths:
-#       - .npm/
-#     policy: pull-push
+.maven_job: &maven_job
+  stage: betest
+  image: maven:3.9-eclipse-temurin-17-alpine
+  tags:
+    - DinD
+
+##Node setup##
+.setup_node: &setup_node
+  - npm -v
+  - node -v
+  - cd frontend && ls -al | grep package.json
+
+##Install Dependencies##
+.install_deps: &install_deps
+  - npm ci --cache ../.npm && ls -al | grep node_modules
+
+##Cache setup##
+.cache_pull: &cache_pull
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - .npm/
+    policy: pull
 
 
-# test_unit:
-#   <<: *node_job
-#   needs: [frontend_build]
-#   cache: *cache_pull
-#   script:
-#     - *setup_node
-#     - *install_deps
-#     - npm run test:ci
+frontend_build:
+  <<: *node_job
+  script:
+    - *setup_node
+    - ls -al | grep node_modules >> /dev/null || echo "node_modules not found"
+    - *install_deps
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - .npm/
+    policy: pull-push
 
 
-# ##Container3
-# linting_test:
-#   <<: *node_job
-#   needs: [frontend_build]
-#   cache: *cache_pull
-#   script:
-#     - *setup_node
-#     - *install_deps
-#     - npm run lint && echo "✅ Linting passed with no errors!"
+test_unit:
+  <<: *node_job
+  needs: [frontend_build]
+  cache: *cache_pull
+  script:
+    - *setup_node
+    - *install_deps
+    - npm run test:ci
 
-# # ######Reusable code for backend tests######
 
-# .cache_pull_backend: &cache_pull_backend
-#     key: ${CI_COMMIT_REF_SLUG}
-#     paths:
-#       - .mvn/
-#     policy: pull
+##Container3
+linting_test:
+  <<: *node_job
+  needs: [frontend_build]
+  cache: *cache_pull
+  script:
+    - *setup_node
+    - *install_deps
+    - npm run lint && echo "✅ Linting passed with no errors!"
 
-# .build_backend: &build_backend
-#   - pwd
-#   - ls -al
-#   - cd backend && ls -al | grep pom.xml
+# ######Reusable code for backend tests######
 
-# backend_build:
-#   <<: *maven_job
-#   script:
-#     - *build_backend
-#   cache:
-#     key: ${CI_COMMIT_REF_SLUG}
-#     paths:
-#       - .mvn/
-#     policy: pull-push
+.cache_pull_backend: &cache_pull_backend
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - .mvn/
+    policy: pull
 
-# backend_unit_test:
-#   <<: *maven_job
-#   needs:
-#     - backend_build
-#   services:
-#     - name: postgres:15.3
-#       alias: postgres-db
-#   variables:
-#     POSTGRES_DB: my_database
-#     POSTGRES_USER: postgres
-#     POSTGRES_PASSWORD: "12345678"
-#     SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-db:5432/my_database
-#     SPRING_DATASOURCE_USERNAME: postgres
-#     SPRING_DATASOURCE_PASSWORD: "12345678"
-#   cache: *cache_pull_backend
-#   script:
-#     - cd backend
-#     - ./mvnw test -Dtest="VisitorControllerTest" -DfailIfNoTests=false
+.build_backend: &build_backend
+  - pwd
+  - ls -al
+  - cd backend && ls -al | grep pom.xml
 
-# backend_linting_test:
-#   <<: *maven_job
-#   needs:
-#     - backend_build
-#   cache: *cache_pull_backend
-#   script:
-#     - *build_backend
-#     - ./mvnw checkstyle:check && echo "✅ Checkstyle passed with no errors!"
+backend_build:
+  <<: *maven_job
+  script:
+    - *build_backend
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - .mvn/
+    policy: pull-push
+
+backend_unit_test:
+  <<: *maven_job
+  needs:
+    - backend_build
+  services:
+    - name: postgres:15.3
+      alias: postgres-db
+  variables:
+    POSTGRES_DB: my_database
+    POSTGRES_USER: postgres
+    POSTGRES_PASSWORD: "12345678"
+    SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-db:5432/my_database
+    SPRING_DATASOURCE_USERNAME: postgres
+    SPRING_DATASOURCE_PASSWORD: "12345678"
+  cache: *cache_pull_backend
+  script:
+    - cd backend
+    - ./mvnw test -Dtest="VisitorControllerTest" -DfailIfNoTests=false
+
+backend_linting_test:
+  <<: *maven_job
+  needs:
+    - backend_build
+  cache: *cache_pull_backend
+  script:
+    - *build_backend
+    - ./mvnw checkstyle:check && echo "✅ Checkstyle passed with no errors!"
 
 
 
