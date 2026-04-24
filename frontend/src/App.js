@@ -17,10 +17,10 @@ function App() {
       
       const data = await res.json();
       
-      if (data?.count !== undefined) {
-        setCount(data.count);
-      } else {
+      if (data?.count === undefined) {
         setCount(data);
+      } else {
+        setCount(data.count);
       }
       
       setLoading(false);
