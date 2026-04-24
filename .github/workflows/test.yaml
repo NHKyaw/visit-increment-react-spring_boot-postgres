@@ -133,7 +133,7 @@ jobs:
   #         npm ci
   #         npm run lint
 
-  fe_sonar_scan:
+  sonar_scan:
     runs-on: ubuntu-latest
 
     steps:
@@ -160,7 +160,7 @@ jobs:
           args: >
             -Dsonar.projectKey=NHKyaw_visit-increment-app-github-action-aws-infra
             -Dsonar.organization=visitincrementorgkey
-            -Dsonar.sources=./frontend/src
+            -Dsonar.sources=./frontend/src, ./backend/src
             -Dsonar.host.url=https://sonarcloud.io
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
