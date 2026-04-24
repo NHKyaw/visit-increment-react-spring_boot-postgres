@@ -7,7 +7,7 @@ import java.sql.DriverManager;
 import java.sql.Statement;
 
 @Configuration
-public final class DatabaseConfig {
+public class DatabaseConfig {
 
     /**
      * Initializes the database by creating it if it does not exist.
