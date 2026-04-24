@@ -29,15 +29,21 @@ public class DatabaseConfig {
 
     @PostConstruct
     public void init() {
-        try (Connection conn = DriverManager.getConnection(rootUrl, user, pass);
-             Statement stmt = conn.createStatement()) {
-
-            String createDbSql = "CREATE DATABASE " + dbName;
-            stmt.executeUpdate(createDbSql);
-            logger.info("Database '{}' created successfully.", dbName);
-
-        } catch (Exception e) {
-            logger.warn("Database already exists or error: {}", e.getMessage());
-        }
+    if (!dbName.matches("[a-zA-Z0-9_]+")) {
+        logger.warn("Invalid database name '{}'. Skipping creation.", dbName);
+        return;
     }
+    try (Connection conn = DriverManager.getConnection(rootUrl, user, pass);
+         Statement stmt = conn.createStatement()) {
+
+        // Suppressed: dbName is validated above against a strict alphanumeric pattern
+        @SuppressWarnings("java:S2077")
+        String createDbSql = "CREATE DATABASE `" + dbName + "`";
+        stmt.executeUpdate(createDbSql);
+        logger.info("Database '{}' created successfully.", dbName);
+
+    } catch (Exception e) {
+        logger.warn("Database already exists or error: {}", e.getMessage());
+    }
+}
 }
