@@ -39,7 +39,7 @@ public final class DatabaseConfig {
      * Creates the database if it does not already exist.
      */
     @PostConstruct
-    public final void init() {
+    public void init() {
         if (!dbName.matches("\\w+")) {
             LOGGER.warn(
                 "Invalid database name '{}'. Skipping creation.", dbName
