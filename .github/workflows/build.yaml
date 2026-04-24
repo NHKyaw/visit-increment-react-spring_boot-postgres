@@ -34,17 +34,21 @@ jobs:
             echo "IMAGE_TAG=${BRANCH_NAME}" >> $GITHUB_ENV
           fi
 
-      - name: Build Images
+      - name: Build Frontend Image
+        if: ${{ inputs.stack == 'react' }}
+        run: |
+          docker build -t $DOCKER_REPO:frontend-${IMAGE_TAG} frontend
+
+      - name: Build Backend Image
         if: ${{ inputs.stack == 'java' }}
         run: |
           docker build -t $DOCKER_REPO:backend-${IMAGE_TAG} backend
-          docker build -t $DOCKER_REPO:frontend-${IMAGE_TAG} frontend
           
       - name: Run Trivy scan for backend image
         if: ${{ inputs.stack == 'java' }}
         uses: aquasecurity/trivy-action@v0.20.0
         with:
-            image-ref: $DOCKER_REPO:backend-${IMAGE_TAG}
+            image-ref: ${{ env.DOCKER_REPO }}:backend-${{ env.IMAGE_TAG }}
             format: 'table'
             exit-code: '1'
             severity: 'CRITICAL,HIGH'
@@ -53,16 +57,22 @@ jobs:
         if: ${{ inputs.stack == 'react' }}
         uses: aquasecurity/trivy-action@v0.20.0
         with:
-            image-ref: $DOCKER_REPO:frontend-${IMAGE_TAG}
+            image-ref: ${{ env.DOCKER_REPO }}:frontend-${{ env.IMAGE_TAG }}
             format: 'table'
             exit-code: '1'
             severity: 'CRITICAL,HIGH'
 
-      - name: Push Images
+      - name: Push Frontend Image
         if: ${{ inputs.stack == 'react' }}
         run: |
           
           docker push $DOCKER_REPO:frontend-${IMAGE_TAG}
+          docker push $DOCKER_REPO:backend-${IMAGE_TAG}
+
+      - name: Push Backend Image
+        if: ${{ inputs.stack == 'java' }}
+        run: |
+          
           docker push $DOCKER_REPO:backend-${IMAGE_TAG}
 
       - name: Check if image exists
