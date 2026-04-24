@@ -11,7 +11,7 @@ import java.sql.DriverManager;
 import java.sql.Statement;
 
 /** Configuration class to initialize the database if it does not exist. */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 public final class DatabaseConfig {
 
     /** Logger for this class. */
