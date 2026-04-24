@@ -10,40 +10,55 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.Statement;
 
+/** Configuration class to initialize the database if it does not exist. */
 @Configuration
-public class DatabaseConfig {
+public final class DatabaseConfig {
 
-    private static final Logger logger = LoggerFactory.getLogger(DatabaseConfig.class);
+    /** Logger for this class. */
+    private static final Logger LOGGER =
+            LoggerFactory.getLogger(DatabaseConfig.class);
 
+    /** The root datasource URL. */
     @Value("${spring.datasource.url}")
     private String rootUrl;
 
+    /** The database username. */
     @Value("${spring.datasource.username}")
     private String user;
 
+    /** The database password. */
     @Value("${spring.datasource.password}")
     private String pass;
 
+    /** The name of the database to create. */
     @Value("${app.database.name}")
     private String dbName;
 
+    /**
+     * Initializes the database on application startup.
+     * Creates the database if it does not already exist.
+     */
     @PostConstruct
-    public void init() {
-    if (!dbName.matches("\\w+")) {
-        logger.warn("Invalid database name '{}'. Skipping creation.", dbName);
-        return;
-    }
-    try (Connection conn = DriverManager.getConnection(rootUrl, user, pass);
-         Statement stmt = conn.createStatement()) {
+    public final void init() {
+        if (!dbName.matches("\\w+")) {
+            LOGGER.warn(
+                "Invalid database name '{}'. Skipping creation.", dbName
+            );
+            return;
+        }
+        try (Connection conn = DriverManager.getConnection(rootUrl, user, pass);
+             Statement stmt = conn.createStatement()) {
 
-        // Suppressed: dbName is validated above against a strict alphanumeric pattern
-        @SuppressWarnings("java:S2077")
-        String createDbSql = "CREATE DATABASE `" + dbName + "`";
-        stmt.executeUpdate(createDbSql);
-        logger.info("Database '{}' created successfully.", dbName);
+            // Suppressed: dbName is validated above
+            @SuppressWarnings("java:S2077")
+            String createDbSql = "CREATE DATABASE `" + dbName + "`";
+            stmt.executeUpdate(createDbSql);
+            LOGGER.info("Database '{}' created successfully.", dbName);
 
-    } catch (Exception e) {
-        logger.warn("Database already exists or error: {}", e.getMessage());
+        } catch (Exception e) {
+            LOGGER.warn(
+                "Database already exists or error: {}", e.getMessage()
+            );
+        }
     }
-}
 }

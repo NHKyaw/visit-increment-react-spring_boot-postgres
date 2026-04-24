@@ -135,6 +135,7 @@ jobs:
 
   sonar_scan:
     runs-on: ubuntu-latest
+    needs: [test, lint]
 
     steps:
       - uses: actions/checkout@v4
