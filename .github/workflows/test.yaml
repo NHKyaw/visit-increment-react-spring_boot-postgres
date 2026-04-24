@@ -55,10 +55,15 @@ jobs:
           SPRING_DATASOURCE_USERNAME: postgres
           SPRING_DATASOURCE_PASSWORD: ${{ secrets.DB_PASSWORD }}
           APP_DATABASE_NAME: my_database
-        run: ./mvnw test
+        run: ./mvnw test jacoco:report
       
-        
 
+      # Upload backend test results and coverage report as artifacts
+      - uses: actions/upload-artifact@v4
+        with:
+          name: backend-coverage
+          path: backend/target/site/jacoco/jacoco.xml
+  
       # Frontend tests
       - name: Set up Node
         uses: actions/setup-node@v4
@@ -183,6 +188,9 @@ jobs:
             -Dsonar.organization=visitincrementorgkey
             -Dsonar.sources=./frontend/src,./backend/src
             -Dsonar.java.binaries=./backend/target/classes
+            -Dsonar.coverage.jacoco.xmlReportPaths=./backend/target/site/jacoco/jacoco.xml
+            -Dsonar.javascript.lcov.reportPaths=./frontend/coverage/lcov.info
+            -Dsonar.exclusions=**/DemoApplication.java
             -Dsonar.host.url=https://sonarcloud.io
             -Dsonar.qualitygate.wait=true
             -Dsonar.qualitygate.timeout=300
