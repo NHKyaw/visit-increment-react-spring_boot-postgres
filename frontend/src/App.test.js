@@ -1,3 +1,4 @@
+/* eslint-env es2020 */
 import React from 'react';
 import { render, screen, fireEvent, act, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
