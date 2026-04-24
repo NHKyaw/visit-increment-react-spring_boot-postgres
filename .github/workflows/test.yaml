@@ -14,7 +14,7 @@ jobs:
   #       env:
   #         POSTGRES_DB: my_database
   #         POSTGRES_USER: postgres
-  #         POSTGRES_PASSWORD: Coffee$Lake99!Blue
+  #         POSTGRES_PASSWORD: ${{ secrets.DB_PASSWORD }}
   #       ports:
   #         - 5432:5432
   #       options: >-
@@ -169,6 +169,8 @@ jobs:
 
       - name: Compile backend       
         working-directory: backend
+        env:
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
         run: ./mvnw compile -DskipTests
 
       - name: Run SonarQube scan
