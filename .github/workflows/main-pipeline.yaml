@@ -9,6 +9,7 @@ jobs:
   # 1. TEST PHASE 
   test-app:
     uses: ./.github/workflows/test.yaml
+    secrets: inherit
 
   # # 1. BUILD PHASE
   # build-java:
