@@ -8,6 +8,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 /** Unit tests for the Visitor class. */
 class VisitorTest {
 
+    /** Reusable timestamp constant for tests. */
+    private static final String VISIT_TIME = "2024-01-01T00:00:00";
+
     /** Tests that the default constructor creates a visitor with null id. */
     @Test
     void testDefaultConstructor() {
@@ -18,14 +21,14 @@ class VisitorTest {
     /** Tests that the constructor correctly sets the visit time. */
     @Test
     void testConstructorWithTime() {
-        Visitor visitor = new Visitor("2024-01-01T00:00:00");
-        assertEquals("2024-01-01T00:00:00", visitor.getVisitTime());
+        Visitor visitor = new Visitor(VISIT_TIME);
+        assertEquals(VISIT_TIME, visitor.getVisitTime());
     }
 
     /** Tests that a visitor created with a time has a non-null visit time. */
     @Test
     void testGetId() {
-        Visitor visitor = new Visitor("2024-01-01T00:00:00");
+        Visitor visitor = new Visitor(VISIT_TIME);
         assertNotNull(visitor.getVisitTime());
     }
 
