@@ -29,7 +29,7 @@ public class DatabaseConfig {
 
     @PostConstruct
     public void init() {
-    if (!dbName.matches("[a-zA-Z0-9_]+")) {
+    if (!dbName.matches("\\w+")) {
         logger.warn("Invalid database name '{}'. Skipping creation.", dbName);
         return;
     }

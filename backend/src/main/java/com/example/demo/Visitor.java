@@ -39,4 +39,13 @@ public final class Visitor {
     public Long getId() {
         return id;
     }
+
+    /**
+     * Gets the visit time.
+     *
+     * @return the visit time
+     */
+    public String getVisitTime() {
+        return visitTime;
+    }
 }

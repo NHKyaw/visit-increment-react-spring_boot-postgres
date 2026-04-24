@@ -17,7 +17,7 @@ function App() {
       
       const data = await res.json();
       
-      if (data && typeof data.count !== 'undefined') {
+      if (data?.count !== undefined) {
         setCount(data.count);
       } else {
         setCount(data);
