@@ -204,7 +204,7 @@ jobs:
             -Dsonar.javascript.lcov.reportPaths=./frontend/coverage/lcov.info
             -Dsonar.coverage.exclusions=**/index.js,**/index.jsx,**/reportWebVitals.js,**/setupTests.js,**/DemoApplication.java,**/DatabaseConfig.java
             -Dsonar.test.exclusions=**/*.test.js,**/*.test.jsx
-            -Dsonar.exclusions=**/*.test.js,**/*.test.jsx
+            -Dsonar.exclusions=**/*.test.js,**/*.test.jsx,**/*Test.java,**/*Tests.java,**/test/**
             -Dsonar.host.url=https://sonarcloud.io
             -Dsonar.qualitygate.wait=true
             -Dsonar.qualitygate.timeout=300
