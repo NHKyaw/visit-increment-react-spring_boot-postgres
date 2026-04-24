@@ -10,5 +10,7 @@ class DemoApplicationTests {
     /** Verifies that the Spring application context loads successfully. */
     @Test
     void contextLoads() {
+        // This test is intentionally empty.
+        // It verifies that the Spring application context starts without errors.
     }
 }
