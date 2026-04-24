@@ -1,6 +1,10 @@
 package com.example.demo;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
+
 import jakarta.annotation.PostConstruct;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -9,28 +13,31 @@ import java.sql.Statement;
 @Configuration
 public class DatabaseConfig {
 
-    /**
-     * Initializes the database by creating it if it does not exist.
-     */
+    private static final Logger logger = LoggerFactory.getLogger(DatabaseConfig.class);
+
+    @Value("${spring.datasource.url}")
+    private String rootUrl;
+
+    @Value("${spring.datasource.username}")
+    private String user;
+
+    @Value("${spring.datasource.password}")
+    private String pass;
+
+    @Value("${app.database.name}")
+    private String dbName;
+
     @PostConstruct
     public void init() {
-        // 1. Connect to the default 'postgres' database first
-        String rootUrl = "jdbc:postgresql://postgres-db:5432/my_database";
-        String user = "postgres";
-        String pass = "12345678";
-        String dbName = "my_database";
-
         try (Connection conn = DriverManager.getConnection(rootUrl, user, pass);
              Statement stmt = conn.createStatement()) {
-            // 2. Check if our database exists, if not, create it
+
             String createDbSql = "CREATE DATABASE " + dbName;
             stmt.executeUpdate(createDbSql);
-            System.out.println(
-                "Database '" + dbName + "' created successfully.");
+            logger.info("Database '{}' created successfully.", dbName);
+
         } catch (Exception e) {
-            // If it already exists, it will throw an error, which we can ignore
-            System.out.println("Database already exists or error: "
-                    + e.getMessage());
+            logger.warn("Database already exists or error: {}", e.getMessage());
         }
     }
 }

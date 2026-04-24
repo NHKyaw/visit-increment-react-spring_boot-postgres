@@ -24,7 +24,7 @@ public class VisitorControllerTest {
     private VisitorController controller;
 
     @Test
-    public void testAddVisit_returnsConfirmationMessage() {
+    public void testAddVisitReturnsConfirmationMessage() { // ✅ removed underscores
         when(repo.save(any(Visitor.class)))
                 .thenReturn(new Visitor("2024-01-01"));
 
@@ -35,7 +35,7 @@ public class VisitorControllerTest {
     }
 
     @Test
-    public void testGetCount_returnsCountFromRepo() {
+    public void testGetCountReturnsCountFromRepo() { // ✅ already fine, but consistent
         when(repo.count()).thenReturn(5L);
 
         final Map<String, Long> result = controller.getCount();
@@ -44,7 +44,7 @@ public class VisitorControllerTest {
     }
 
     @Test
-    public void testGetCount_returnsZeroWhenEmpty() {
+    public void testGetCountReturnsZeroWhenEmpty() { // ✅ already fine, but consistent
         when(repo.count()).thenReturn(0L);
 
         final Map<String, Long> result = controller.getCount();
