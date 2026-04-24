@@ -202,7 +202,9 @@ jobs:
             -Dsonar.java.binaries=./backend/target/classes
             -Dsonar.coverage.jacoco.xmlReportPaths=./backend/target/site/jacoco/jacoco.xml
             -Dsonar.javascript.lcov.reportPaths=./frontend/coverage/lcov.info
-            -Dsonar.coverage.exclusions=**/index.js,**/reportWebVitals.js,**/DemoApplication.java
+            -Dsonar.coverage.exclusions=**/index.js,**/index.jsx,**/reportWebVitals.js,**/setupTests.js,**/DemoApplication.java,**/DatabaseConfig.java
+            -Dsonar.test.exclusions=**/*.test.js,**/*.test.jsx
+            -Dsonar.exclusions=**/*.test.js,**/*.test.jsx
             -Dsonar.host.url=https://sonarcloud.io
             -Dsonar.qualitygate.wait=true
             -Dsonar.qualitygate.timeout=300

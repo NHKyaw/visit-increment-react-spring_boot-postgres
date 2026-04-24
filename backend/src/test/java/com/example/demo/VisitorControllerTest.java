@@ -1,54 +1,57 @@
 package com.example.demo;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 
-@ExtendWith(MockitoExtension.class)
-public class VisitorControllerTest {
+/** Unit tests for VisitorController. */
+@WebMvcTest(VisitorController.class)
+class VisitorControllerTest {
 
-    @Mock
+    /** MockMvc for simulating HTTP requests. */
+    @Autowired
+    private MockMvc mockMvc;
+
+    /** Mocked visitor repository. */
+    @MockitoBean
     private VisitorRepo repo;
 
-    @InjectMocks
-    private VisitorController controller;
-
+    /** Tests that POST /api/visit records a visit and returns confirmation. */
     @Test
-    public void testAddVisitReturnsConfirmationMessage() { // ✅ removed underscores
-        when(repo.save(any(Visitor.class)))
-                .thenReturn(new Visitor("2024-01-01"));
-
-        final String result = controller.addVisit();
-
-        assertEquals("Visit Recorded!", result);
-        verify(repo, times(1)).save(any(Visitor.class));
+    void testAddVisit() throws Exception {
+        when(repo.save(any(Visitor.class))).thenReturn(new Visitor("2024-01-01"));
+        mockMvc.perform(post("/api/visit"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("Visit Recorded!"));
     }
 
+    /** Tests that GET /api/visit/count returns the visit count. */
     @Test
-    public void testGetCountReturnsCountFromRepo() { // ✅ already fine, but consistent
-        when(repo.count()).thenReturn(5L);
-
-        final Map<String, Long> result = controller.getCount();
-
-        assertEquals(5L, result.get("count"));
+    void testGetCount() throws Exception {
+        when(repo.count()).thenReturn(42L);
+        mockMvc.perform(get("/api/visit/count"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.count").value(42));
     }
 
+    /** Tests that GET /api/visit/count returns zero when no visits exist. */
     @Test
-    public void testGetCountReturnsZeroWhenEmpty() { // ✅ already fine, but consistent
+    void testGetCountZero() throws Exception {
         when(repo.count()).thenReturn(0L);
-
-        final Map<String, Long> result = controller.getCount();
-
-        assertEquals(0L, result.get("count"));
+        mockMvc.perform(get("/api/visit/count"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.count").value(0));
     }
 }

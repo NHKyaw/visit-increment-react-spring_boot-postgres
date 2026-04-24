@@ -6,7 +6,7 @@ import App from './App';
 
 beforeEach(() => {
   jest.spyOn(console, 'error').mockImplementation(() => {});
-  globalThis.fetch = jest.fn(); // ✅ replaced global with globalThis
+  globalThis.fetch = jest.fn();
   jest.useFakeTimers();
 });
 
@@ -16,7 +16,6 @@ afterEach(() => {
   jest.useRealTimers();
 });
 
-// ── Test Group 1: Initial Render ──────────────────────────────────────────────
 describe('Initial Render', () => {
   test('shows Loading... on first render', async () => {
     fetch.mockResolvedValueOnce({
@@ -24,7 +23,7 @@ describe('Initial Render', () => {
       json: async () => ({ count: 5 }),
     });
     render(<App />);
-    expect(screen.getByText('CI/CD Test App:UAT:v1')).toBeInTheDocument();
+    expect(screen.getByText('Loading...')).toBeInTheDocument();
   });
 
   test('renders the app title', async () => {
@@ -35,9 +34,17 @@ describe('Initial Render', () => {
     render(<App />);
     expect(screen.getByText('CI/CD Test App:UAT:v1')).toBeInTheDocument();
   });
+
+  test('renders Log New Visit button', async () => {
+    fetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ count: 0 }),
+    });
+    render(<App />);
+    expect(screen.getByText('Log New Visit')).toBeInTheDocument();
+  });
 });
 
-// ── Test Group 2: Fetching Visit Count ────────────────────────────────────────
 describe('Fetching Visit Count', () => {
   test('displays count from API response object { count: N }', async () => {
     fetch.mockResolvedValueOnce({
@@ -57,7 +64,7 @@ describe('Fetching Visit Count', () => {
     expect(await screen.findByText('7')).toBeInTheDocument();
   });
 
-  test('hides Loading... after fetch completes', async () => {
+  test('hides Loading after fetch completes', async () => {
     fetch.mockResolvedValueOnce({
       ok: true,
       json: async () => ({ count: 3 }),
@@ -69,7 +76,6 @@ describe('Fetching Visit Count', () => {
   });
 });
 
-// ── Test Group 3: API Error Handling ─────────────────────────────────────────
 describe('Error Handling', () => {
   test('stops loading if fetch throws a network error', async () => {
     fetch.mockRejectedValueOnce(new Error('Network Error'));
@@ -88,17 +94,7 @@ describe('Error Handling', () => {
   });
 });
 
-// ── Test Group 4: Log New Visit Button ───────────────────────────────────────
-describe('"Log New Visit" Button', () => {
-  test('renders the button', async () => {
-    fetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({ count: 0 }),
-    });
-    render(<App />);
-    expect(await screen.findByText('Log New Visit')).toBeInTheDocument();
-  });
-
+describe('Log New Visit Button', () => {
   test('calls POST then refreshes count after 200ms delay', async () => {
     fetch.mockResolvedValueOnce({
       ok: true,
@@ -123,5 +119,41 @@ describe('"Log New Visit" Button', () => {
       expect.stringContaining('/api/visit'),
       { method: 'POST' }
     );
+  });
+
+  test('handles POST failure gracefully', async () => {
+    fetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ count: 0 }),
+    });
+    fetch.mockResolvedValueOnce({ ok: false });
+
+    render(<App />);
+    expect(await screen.findByText('0')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByText('Log New Visit'));
+    await act(async () => {
+      jest.advanceTimersByTime(200);
+    });
+
+    expect(screen.getByText('Log New Visit')).toBeInTheDocument();
+  });
+
+  test('handles POST network error gracefully', async () => {
+    fetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ count: 0 }),
+    });
+    fetch.mockRejectedValueOnce(new Error('Network Error'));
+
+    render(<App />);
+    expect(await screen.findByText('0')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByText('Log New Visit'));
+    await act(async () => {
+      jest.advanceTimersByTime(200);
+    });
+
+    expect(screen.getByText('Log New Visit')).toBeInTheDocument();
   });
 });
