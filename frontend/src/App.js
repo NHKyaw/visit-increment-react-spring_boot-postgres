@@ -6,7 +6,7 @@ function App() {
   
   // 1. Run 'ip addr' in your VMware terminal
   // 2. Replace the IP below with your actual VM IP address
-  const BASE_URL = process.env.REACT_APP_API_URL;
+  const BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080/api/visit';
 
   const refreshCount = useCallback(async () => {
     setLoading(true);
