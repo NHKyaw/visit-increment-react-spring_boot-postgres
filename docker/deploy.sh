@@ -11,4 +11,4 @@ sudo /usr/bin/docker rmi nhkyaw/visit-record-app:frontend-${IMAGE_TAG} || echo "
 sudo /usr/bin/docker pull nhkyaw/visit-record-app:backend-${IMAGE_TAG}
 sudo /usr/bin/docker pull nhkyaw/visit-record-app:frontend-${IMAGE_TAG}
 
-sudo /usr/bin/docker compose --env-file .env.${IMAGE_TAG} -f docker-compose.yaml up -d
+sudo /usr/bin/docker compose --env-file .env.${IMAGE_TAG} -f docker-compose.yaml up --build -d
