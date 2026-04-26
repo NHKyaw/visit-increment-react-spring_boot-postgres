@@ -33,9 +33,3 @@ jobs:
     uses: ./.github/workflows/deploy.yaml
     secrets: inherit 
 
-
-  # 4. Destroy Phase (Runs only if Deploy succeeds, currently for testing purposes)
-  destroy-app:
-    needs: [deploy-app]
-    uses: ./.github/workflows/destroy.yaml
-    secrets: inherit
