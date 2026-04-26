@@ -13,7 +13,7 @@ public final class WebConfig implements WebMvcConfigurer {
      * @param registry the cors registry
      */
     @Override
-    public final void addCorsMappings(final CorsRegistry registry) {
+    public void addCorsMappings(final CorsRegistry registry) {
         registry.addMapping("/**")
         .allowedOriginPatterns("*")
         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
