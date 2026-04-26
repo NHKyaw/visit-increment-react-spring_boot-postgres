@@ -1,21 +1,6 @@
 name: Terraform Destroy (Manual + Approval)
 
 on:
-  workflow_call:
-    inputs:
-      stack:
-        required: true
-        type: string
-      environment:
-        required: true
-        type: string
-    secrets:
-      AWS_ACCESS_KEY_ID:
-        required: true
-      AWS_SECRET_ACCESS_KEY:
-        required: true
-      AWS_REGION:
-        required: true
   workflow_dispatch:
     inputs:
       environment:
@@ -78,7 +63,7 @@ jobs:
         working-directory: terraform
         run: |
           terraform init \
-            -backend-config="key=env/${ENV}/${{ inputs.stack }}/terraform.tfstate"
+            -backend-config="key=env/${ENV}/terraform.tfstate"
           
           terraform destroy \
             -auto-approve \
