@@ -1,5 +1,9 @@
 services:
   frontend:
+    build:
+      context: .
+      args:
+        REACT_APP_API_URL: ${REACT_APP_API_URL} 
     image: nhkyaw/visit-record-app:frontend-${ENV_BRANCH}
     container_name: frontend-app
     ports:
