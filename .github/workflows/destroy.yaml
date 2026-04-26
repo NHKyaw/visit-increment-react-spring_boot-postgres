@@ -1,10 +1,12 @@
 name: Terraform Destroy (Manual + Approval)
 
-
 on:
   workflow_call:
     inputs:
-      stack: # "react" or "java"
+      stack:
+        required: true
+        type: string
+      environment:
         required: true
         type: string
     secrets:
@@ -24,6 +26,13 @@ on:
           - dev
           - uat
           - main
+      stack:
+        description: "Stack to destroy (react / java)"
+        required: true
+        type: choice
+        options:
+          - react
+          - java
       confirm:
         description: "Type DESTROY to confirm"
         required: true
@@ -34,7 +43,9 @@ jobs:
     environment: terraform-destroy
 
     steps:
-      - name: Safety check
+      # Safety check only applies to manual runs (workflow_dispatch)
+      - name: Safety check (manual runs only)
+        if: github.event_name == 'workflow_dispatch'
         run: |
           if [ "${{ inputs.confirm }}" != "DESTROY" ]; then
             echo "❌ Confirmation failed. Type DESTROY exactly."
@@ -55,7 +66,7 @@ jobs:
         with:
           terraform_wrapper: false
 
-      - name: Map branch to environment #$GITHUB_ENV is a special file that sets environment variables for future steps in a job.
+      - name: Map branch to environment
         run: |
           if [[ "${GITHUB_REF_NAME}" == "main" ]]; then
             echo "ENV=prod" >> $GITHUB_ENV
@@ -66,9 +77,11 @@ jobs:
       - name: Terraform destroy
         working-directory: terraform
         run: |
-          terraform init -backend-config="key=env/${ENV}/terraform.tfstate"
+          terraform init \
+            -backend-config="key=env/${ENV}/${{ inputs.stack }}/terraform.tfstate"
+          
           terraform destroy \
             -auto-approve \
             -var-file="${ENV}.tfvars"
 
-          echo "✅ Terraform destroy completed for environment: ${ENV}"
+          echo "✅ Destroyed stack=${{ inputs.stack }} env=${ENV}"
