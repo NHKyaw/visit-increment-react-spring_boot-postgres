@@ -51,7 +51,7 @@ public final class DatabaseConfig {
 
             // Suppressed: dbName is validated above
             @SuppressWarnings("java:S2077")
-            String createDbSql = "CREATE DATABASE `" + dbName + "`";
+            String createDbSql = "CREATE DATABASE " + dbName;
             stmt.executeUpdate(createDbSql);
             LOGGER.info("Database '{}' created successfully.", dbName);
 
